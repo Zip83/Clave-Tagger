@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments and local tools
+.venv*/
+venv/
+env/
+uv.exe
+
+# Local secrets / environment
+.env
+.env.*
+!.env.example
+
+# Runtime output
+logs/*
+!logs/.gitkeep
+progress/*
+!progress/.gitkeep
+reports/*
+!reports/.gitkeep
+settings/*
+!settings/.gitkeep
+backups/
+
+# Local trained models and model/cache artifacts
+models/*
+!models/README.md
+.cache/
+huggingface/
+.huggingface/
+
+# Generated reports / legacy root outputs
+*.csv
+*.joblib
+*.pt
+music_category_report_progress.json
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

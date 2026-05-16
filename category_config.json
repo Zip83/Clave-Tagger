@@ -1,0 +1,172 @@
+{
+  "playlist_label_patterns": {
+    "son": "Son Cubano",
+    "son cubano": "Son Cubano",
+    "cha cha cha": "Cha cha cha",
+    "chachacha": "Cha cha cha",
+    "timba": "Timba",
+    "bachata": "Bachata",
+    "merengue": "Merengue",
+    "kizomba": "Kizomba",
+    "cumbia": "Cumbia",
+    "reggaeton": "Reggaeton",
+    "salsaton": "Salsaton",
+    "rumba": "Rumba"
+  },
+  "text_classification": {
+    "use_source_folder": false,
+    "minimum_score": 35,
+    "conflict_margin": 35,
+    "confidence_thresholds": {
+      "high": 100,
+      "medium": 70
+    },
+    "weights": {
+      "genre_strong": 100,
+      "genre_weak": 20,
+      "file_prefix_strong": 100,
+      "file_prefix_weak": 20,
+      "folder_strong": 100,
+      "folder_weak": 20,
+      "text_strong": 70,
+      "text_weak": 10
+    }
+  },
+  "categories": [
+    {
+      "category": "Bachata",
+      "grouping": "#Bachata",
+      "color": "#FF6DFF",
+      "tag_patterns": ["bachata", "romeo santos", "aventura", "prince royce", "alex bueno", "frank reyes", "antony santos", "elvis martinez", "jay d amante", "raulin rodriguez", "teodoro reyes", "toby love"],
+      "model_labels": [],
+      "bpm_boosts": [{"min": 118, "max": 145, "weight": 0.006}],
+      "model_weight": 1.0,
+      "model_low_confidence": true
+    },
+    {
+      "category": "Cha cha cha",
+      "grouping": "#Cha_cha_cha",
+      "color": "cyan",
+      "aliases": ["#ChaChaCha", "ChaChaCha", "Cha cha"],
+      "tag_patterns": ["cha cha cha", "chachacha", "cha cha", "orquesta america", "direct latin influence"],
+      "model_labels": ["Latin---Cha-Cha"],
+      "bpm_boosts": [{"min": 118, "max": 145, "weight": 0.004}],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Conga",
+      "grouping": "#Conga",
+      "color": "darkyellow",
+      "tag_patterns": ["conga"],
+      "model_labels": [],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Cumbia",
+      "grouping": "#cumbia",
+      "color": "#009F00",
+      "aliases": ["#Cumbia"],
+      "tag_patterns": ["cumbia"],
+      "model_labels": ["Latin---Cumbia"],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Kizomba",
+      "grouping": "#Kizomba",
+      "color": "#FFB6FF",
+      "tag_patterns": ["kizomba", "urban kiz", "semba", "nelson freitas", "dj kadu", "dj paparazzi", "kaysha", "stony", "haylton dias", "richard birman"],
+      "model_labels": [],
+      "bpm_boosts": [{"min": 85, "max": 112, "weight": 0.004}],
+      "model_weight": 1.0,
+      "model_low_confidence": true
+    },
+    {
+      "category": "Merengue",
+      "grouping": "#Merengue",
+      "color": "#FFB6B6",
+      "tag_patterns": ["merengue", "milly quezada", "dayany gutierrez", "el potro alvarez", "la banda gorda", "mayco d alma", "orquesta joven", "proyecto uno", "rikarena", "rokabanda", "the newyork band"],
+      "weak_tag_patterns": ["milly quezada"],
+      "model_labels": ["Latin---Merengue"],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Reggaeton",
+      "grouping": "#Reggaeton",
+      "color": "#DF00DF",
+      "tag_patterns": ["reggaeton", "regueton", "daddy yankee", "don omar"],
+      "model_labels": ["Latin---Reggaeton", {"label": "Reggae---Dancehall", "weight": 0.7}],
+      "bpm_boosts": [{"min": 85, "max": 112, "weight": 0.004}],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Salsa (Dura)",
+      "grouping": "#Salsa",
+      "color": "darkgreen",
+      "aliases": ["#Salsa_Dura", "Salsa"],
+      "tag_patterns": ["salsa dura", "salsa", "mambo", "descarga", "fania", "hector lavoe", "willie colon", "ray barretto", "el gran combo", "oscar d leon", "ismael miranda", "la 33", "cuco valoy", "fruko"],
+      "weak_tag_patterns": ["salsa"],
+      "model_labels": ["Latin---Salsa", "Latin---Mambo", "Latin---Descarga", "Latin---Charanga", "Latin---Pachanga"],
+      "bpm_boosts": [{"min": 145, "max": 190, "weight": 0.004}],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Salsa Fusion/Pop",
+      "grouping": "#Salsa_Fusion/Pop",
+      "color": "#00DF00",
+      "tag_patterns": ["salsa pop", "fusion", "remix", "cover", "pop", "salsa version", "santana", "lenny kravitz", "sting", "yuri buenaventura", "williamsburg salsa orchestra", "maite hontele", "chichi peralta"],
+      "weak_tag_patterns": ["pop", "remix", "cover", "salsa version"],
+      "model_labels": ["Latin---Salsa", "Electronic---Latin", "Electronic---Dance-pop", "Pop---Vocal", "Pop---Europop", "Rock---Pop Rock"],
+      "model_weight": 0.95
+    },
+    {
+      "category": "Salsa Romantica",
+      "grouping": "#Salsa_Romantica",
+      "color": "#DBFFDB",
+      "aliases": ["#Salsa_Romántica", "Salsa Romántica"],
+      "tag_patterns": ["salsa romantica", "romantica", "marc anthony", "tito nieves", "gilberto santa rosa", "victor manuelle", "frankie ruiz", "rey ruiz", "eddie santiago", "los adolecentes", "nino segarra", "luis enrique", "ng 2", "k narias"],
+      "weak_tag_patterns": ["marc anthony"],
+      "model_labels": ["Latin---Salsa", "Latin---Bolero", "Pop---Ballad"],
+      "model_weight": 0.95
+    },
+    {
+      "category": "Salsaton",
+      "grouping": "#Salsaton",
+      "color": "#B6FFB6",
+      "aliases": ["#SalsaTon", "Salsa Ton"],
+      "tag_patterns": ["salsaton", "salsa ton", "salsa reggaeton", "salsa urbana"],
+      "model_labels": ["Latin---Salsa", "Latin---Reggaeton", "Electronic---Latin"],
+      "model_weight": 1.0,
+      "model_low_confidence": true
+    },
+    {
+      "category": "Son Cubano",
+      "grouping": "#Son_Cubano",
+      "color": "#999999",
+      "aliases": ["#Son", "Son"],
+      "tag_patterns": ["son cubano", "son", "buena vista", "compay segundo", "ibrahim ferrer"],
+      "weak_tag_patterns": ["son"],
+      "model_labels": ["Latin---Son", "Latin---Son Montuno", "Latin---Cubano", "Latin---Guajira"],
+      "model_weight": 1.0
+    },
+    {
+      "category": "Timba",
+      "grouping": "#Timba",
+      "color": "#49FF49",
+      "tag_patterns": ["timba", "charanga habanera", "van van", "manolito", "maykel blanco", "alexander abreu", "havana d primera", "miguel enriquez", "n taya"],
+      "model_labels": ["Latin---Salsa", "Latin---Cubano", "Latin---Mambo", "Latin---Charanga", "Latin---Afro-Cuban"],
+      "bpm_boosts": [{"min": 145, "max": 190, "weight": 0.003}],
+      "model_weight": 1.0,
+      "model_low_confidence": true
+    },
+    {
+      "category": "Rumba",
+      "grouping": "#Rumba",
+      "color": "#FFD166",
+      "aliases": ["#Guaguanco", "#Guaguancó", "Guaguanco", "Guaguancó"],
+      "tag_patterns": ["rumba", "guaguanco", "guaguancó"],
+      "weak_tag_patterns": ["rumba"],
+      "model_labels": ["Latin---Rumba", "Latin---Guaguancó", "Latin---Guaguanco"],
+      "model_weight": 1.0
+    }
+  ]
+}

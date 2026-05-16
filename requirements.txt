@@ -1,0 +1,9 @@
+librosa
+joblib
+mutagen
+numpy
+pygame
+scikit-learn
+torch
+torchaudio
+transformers

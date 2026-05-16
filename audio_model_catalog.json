@@ -1,0 +1,92 @@
+{
+  "models": [
+    {
+      "name": "Learned local classifier",
+      "kind": "learned",
+      "model_id": "",
+      "rank": 1,
+      "status": "supported",
+      "speed": "depends on backend",
+      "expected_accuracy": "Best fit after training on your own tagged library.",
+      "description": "Uses your trained light/heavy classifier instead of an external audio model. Select mode=learned or mode=all with a classifier file.",
+      "source_url": ""
+    },
+    {
+      "name": "MAEST Discogs 30s 129e",
+      "kind": "huggingface-audio-classification",
+      "model_id": "mtg-upf/discogs-maest-30s-pw-129e",
+      "rank": 2,
+      "status": "supported",
+      "speed": "slow",
+      "expected_accuracy": "Best public preset candidate for Discogs-style music genre labels.",
+      "description": "Large MAEST Discogs model using 30-second inputs and 129 training epochs. Good first choice when processing time is acceptable.",
+      "source_url": "https://huggingface.co/mtg-upf/discogs-maest-30s-pw-129e"
+    },
+    {
+      "name": "MAEST Discogs 30s 73e teacher-student",
+      "kind": "huggingface-audio-classification",
+      "model_id": "mtg-upf/discogs-maest-30s-pw-73e-ts",
+      "rank": 3,
+      "status": "supported",
+      "speed": "medium",
+      "expected_accuracy": "Balanced default used by ClaveTagger so far.",
+      "description": "Current default. Uses the same Discogs label family as the config mapping and has been used for the existing reports.",
+      "source_url": "https://huggingface.co/mtg-upf/discogs-maest-30s-pw-73e-ts"
+    },
+    {
+      "name": "MAEST Discogs 10s 129e",
+      "kind": "huggingface-audio-classification",
+      "model_id": "mtg-upf/discogs-maest-10s-pw-129e",
+      "rank": 4,
+      "status": "supported",
+      "speed": "faster",
+      "expected_accuracy": "Likely less stable than 30s, but useful for quicker broad scans.",
+      "description": "Shorter MAEST window. Best used with full-track averaging when speed matters.",
+      "source_url": "https://huggingface.co/mtg-upf/discogs-maest-10s-pw-129e"
+    },
+    {
+      "name": "MAEST Discogs 5s 129e",
+      "kind": "huggingface-audio-classification",
+      "model_id": "mtg-upf/discogs-maest-5s-pw-129e",
+      "rank": 5,
+      "status": "supported",
+      "speed": "fastest MAEST preset",
+      "expected_accuracy": "Most useful for quick experiments; likely least stable on sparse genre cues.",
+      "description": "Shortest MAEST preset. Use for rough scans or with full-track averaging.",
+      "source_url": "https://huggingface.co/mtg-upf/discogs-maest-5s-pw-129e"
+    },
+    {
+      "name": "Custom Hugging Face audio-classification model",
+      "kind": "huggingface-audio-classification",
+      "model_id": "",
+      "rank": 6,
+      "status": "supported",
+      "speed": "varies",
+      "expected_accuracy": "Unknown until evaluated against your tagged library.",
+      "description": "Enter any Hugging Face audio-classification model id. You will usually need to add its labels to category_config.json model_labels.",
+      "source_url": "https://huggingface.co/models?pipeline_tag=audio-classification"
+    },
+    {
+      "name": "CLAP HTSAT fused",
+      "kind": "zero-shot-audio-classification",
+      "model_id": "laion/clap-htsat-fused",
+      "rank": 7,
+      "status": "future backend",
+      "speed": "heavy",
+      "expected_accuracy": "Promising for zero-shot comparison against your category names, but not wired into the current audio-classification backend.",
+      "description": "Requires a zero-shot audio backend with candidate labels; the current ClaveTagger audio path does not call this mode yet.",
+      "source_url": "https://huggingface.co/laion/clap-htsat-fused"
+    },
+    {
+      "name": "MuQ large MSD",
+      "kind": "music-representation",
+      "model_id": "OpenMuQ/MuQ-large-msd-iter",
+      "rank": 8,
+      "status": "future backend",
+      "speed": "heavy",
+      "expected_accuracy": "Potentially useful as embeddings for a learned classifier, not as a direct category mapper yet.",
+      "description": "Music foundation model trained on Million Song Dataset features. It needs a separate embedding/classifier backend.",
+      "source_url": "https://huggingface.co/OpenMuQ/MuQ-large-msd-iter"
+    }
+  ]
+}
