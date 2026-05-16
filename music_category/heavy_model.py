@@ -31,6 +31,7 @@ def preferred_torch_threads(cpu_count=None, env_value=None):
 
 
 def configure_torch_runtime(torch_module):
+    """Provide configure torch runtime behavior."""
     thread_count = preferred_torch_threads()
     try:
         torch_module.set_num_threads(thread_count)
@@ -44,6 +45,7 @@ def configure_torch_runtime(torch_module):
 
 
 def waveform_to_log_mel(audio, sample_rate=audio_model.SAMPLE_RATE, n_mels=N_MELS, target_frames=TARGET_FRAMES):
+    """Provide waveform to log mel behavior."""
     import librosa
     import numpy as np
     import torch
@@ -68,6 +70,7 @@ def waveform_to_log_mel(audio, sample_rate=audio_model.SAMPLE_RATE, n_mels=N_MEL
 
 
 def load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATION):
+    """Load file tensor."""
     (audio, _sample_rate), _caught, _stderr_output = audio_decode.load_audio(
         file_path,
         sample_rate=audio_model.SAMPLE_RATE,
@@ -79,6 +82,7 @@ def load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATION):
 
 
 def safe_load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATION):
+    """Provide safe load file tensor behavior."""
     try:
         return load_file_tensor(file_path, clip_offset=clip_offset, clip_duration=clip_duration)
     except Exception as error:
@@ -87,6 +91,7 @@ def safe_load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATI
 
 
 def chunk_starts_for_file(file_path, chunk_duration=CHUNK_DURATION, chunk_stride=CHUNK_STRIDE):
+    """Provide chunk starts for file behavior."""
     duration, _caught, _stderr_output = audio_decode.get_duration(file_path)
     if duration <= chunk_duration:
         return [0.0]
@@ -104,8 +109,10 @@ def chunk_starts_for_file(file_path, chunk_duration=CHUNK_DURATION, chunk_stride
 
 
 class AudioCnn:
+    """Provide AudioCnn behavior."""
     @staticmethod
     def create(num_classes):
+        """Create the requested value."""
         import torch.nn as nn
 
         return nn.Sequential(
@@ -127,6 +134,7 @@ class AudioCnn:
 
 
 def collect_labeled_audio_rows(rows, truth_column="id3_grouping_normalized", limit=None, progress_callback=None, cancel_token=None):
+    """Provide collect labeled audio rows behavior."""
     samples = []
     skipped_no_truth = 0
     skipped_missing_file = 0
@@ -198,6 +206,7 @@ def collect_labeled_audio_rows(rows, truth_column="id3_grouping_normalized", lim
 
 
 def expand_samples_to_chunks(samples, max_chunks_per_file=None, progress_callback=None, cancel_token=None):
+    """Provide expand samples to chunks behavior."""
     expanded = []
     total = len(samples)
     for index, (row, label) in enumerate(samples, start=1):
@@ -238,15 +247,19 @@ def expand_samples_to_chunks(samples, max_chunks_per_file=None, progress_callbac
 
 
 class AudioDataset:
+    """Provide AudioDataset behavior."""
     def __init__(self, chunk_samples, label_to_index, cancel_token=None):
+        """Initialize this object."""
         self.chunk_samples = chunk_samples
         self.label_to_index = label_to_index
         self.cancel_token = cancel_token
 
     def __len__(self):
+        """Provide len behavior."""
         return len(self.chunk_samples)
 
     def __getitem__(self, index):
+        """Provide getitem behavior."""
         import torch
 
         if self.cancel_token:
@@ -261,6 +274,7 @@ class AudioDataset:
 
 
 def collate_valid_training_batch(batch):
+    """Provide collate valid training batch behavior."""
     import torch
 
     valid = [item for item in batch if item is not None]
@@ -282,6 +296,7 @@ def train_heavy_classifier(
     progress_callback=None,
     cancel_token=None,
 ):
+    """Train heavy classifier."""
     if cancel_token:
         cancel_token.throw_if_cancelled()
     if progress_callback:
@@ -526,6 +541,7 @@ def train_heavy_classifier(
 
 
 def run_heavy_analysis(rows, classifier_path, progress_callback=None, cancel_token=None):
+    """Run heavy analysis."""
     if cancel_token:
         cancel_token.throw_if_cancelled()
     if progress_callback:

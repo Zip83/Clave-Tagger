@@ -6,6 +6,7 @@ CATALOG_PATH = Path(__file__).resolve().parent.parent / "audio_model_catalog.jso
 
 
 def load_catalog(path=CATALOG_PATH):
+    """Load catalog."""
     catalog_path = Path(path)
     if not catalog_path.exists():
         return []
@@ -15,20 +16,24 @@ def load_catalog(path=CATALOG_PATH):
 
 
 def supported_models(path=CATALOG_PATH):
+    """Provide supported models behavior."""
     return [model for model in load_catalog(path) if model.get("status") == "supported"]
 
 
 def preset_label(model):
+    """Provide preset label behavior."""
     model_id = model.get("model_id") or model.get("kind", "")
     suffix = f" - {model_id}" if model_id else ""
     return f"{model.get('rank', '?')}. {model.get('name', 'Unnamed model')}{suffix}"
 
 
 def preset_labels(models=None):
+    """Provide preset labels behavior."""
     return [preset_label(model) for model in (models if models is not None else load_catalog())]
 
 
 def find_by_label(label, models=None):
+    """Provide find by label behavior."""
     for model in models if models is not None else load_catalog():
         if label == preset_label(model):
             return model
@@ -36,6 +41,7 @@ def find_by_label(label, models=None):
 
 
 def format_catalog(models=None):
+    """Format catalog."""
     items = models if models is not None else load_catalog()
     if not items:
         return "No audio model presets found."
@@ -58,6 +64,7 @@ def format_catalog(models=None):
     ]
 
     def render(row):
+        """Provide render behavior."""
         return "  ".join(value.ljust(widths[index]) for index, value in enumerate(row))
 
     lines = [

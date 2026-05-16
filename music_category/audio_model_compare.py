@@ -21,6 +21,7 @@ BASE_COMPARISON_FIELDS = [
 
 
 def comparison_models():
+    """Provide comparison models behavior."""
     return [
         model for model in audio_model_catalog.load_catalog()
         if model.get("status") == "supported"
@@ -30,11 +31,13 @@ def comparison_models():
 
 
 def model_column_prefix(model):
+    """Provide model column prefix behavior."""
     name = re.sub(r"[^a-z0-9]+", "_", model.get("name", "").lower()).strip("_")
     return f"m{model.get('rank', 'x')}_{name}"
 
 
 def comparison_fieldnames(models=None):
+    """Provide comparison fieldnames behavior."""
     fields = list(BASE_COMPARISON_FIELDS)
     for model in models if models is not None else comparison_models():
         prefix = model_column_prefix(model)
@@ -51,6 +54,7 @@ def comparison_fieldnames(models=None):
 
 
 def _base_row(row, models):
+    """Provide base row behavior."""
     output = {field: row.get(field, "") for field in BASE_COMPARISON_FIELDS}
     for model in models:
         prefix = model_column_prefix(model)
@@ -65,6 +69,7 @@ def _base_row(row, models):
 
 
 def _apply_result(output_row, model, result):
+    """Apply result."""
     prefix = model_column_prefix(model)
     output_row[f"{prefix}_grouping"] = result.get("model_audio_suggested_grouping", "")
     output_row[f"{prefix}_confidence"] = result.get("model_audio_confidence", "")
@@ -75,6 +80,7 @@ def _apply_result(output_row, model, result):
 
 
 def _error_result(error):
+    """Provide error result behavior."""
     return {
         "model_audio_suggested_grouping": "Needs review",
         "model_audio_confidence": "review",
@@ -94,6 +100,7 @@ def run_audio_model_comparison(
     progress_callback=None,
     cancel_token=None,
 ):
+    """Run audio model comparison."""
     from transformers import pipeline
 
     selected_models = models or comparison_models()

@@ -3,6 +3,7 @@ from .schemas import DEFAULT_FIRST_MODEL_SECONDS, DEFAULT_SECONDS_PER_MODEL_FILE
 
 
 def estimate_remaining_seconds(rows, mode, progress_path):
+    """Estimate remaining seconds."""
     cached = 0
     if mode in MODELS_THAT_USE_AUDIO:
         cached_results = progress.load_progress(progress_path)
@@ -13,6 +14,7 @@ def estimate_remaining_seconds(rows, mode, progress_path):
 
 
 def print_estimate(rows, mode, progress_path):
+    """Provide print estimate behavior."""
     cached, estimated_seconds = estimate_remaining_seconds(rows, mode, progress_path)
     print(f"Files: {len(rows)}")
     print(f"Mode: {mode}")

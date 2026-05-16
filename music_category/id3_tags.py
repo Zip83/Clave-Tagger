@@ -8,11 +8,13 @@ GROUPING_KEYS = ("TIT1", "GRP1", "TXXX:GROUPING", "TXXX:Grouping", "TXXX:groupin
 
 
 def tag_text(tags, key):
+    """Provide tag text behavior."""
     values = tag_text_values(tags, key)
     return "; ".join(values)
 
 
 def tag_text_values(tags, key):
+    """Provide tag text values behavior."""
     frame = tags.get(key)
     if frame is None or not getattr(frame, "text", None):
         return []
@@ -20,6 +22,7 @@ def tag_text_values(tags, key):
 
 
 def read_color(tags):
+    """Read color."""
     for key in COLOR_KEYS:
         values = tag_text_values(tags, key)
         if values:
@@ -28,6 +31,7 @@ def read_color(tags):
 
 
 def read_id3(file_path):
+    """Read id3."""
     try:
         tags = ID3(file_path)
     except ID3NoHeaderError:
@@ -62,6 +66,7 @@ def read_id3(file_path):
 
 
 def write_id3_grouping(file_path, value):
+    """Write id3 grouping."""
     try:
         tags = ID3(file_path)
     except ID3NoHeaderError:
@@ -73,6 +78,7 @@ def write_id3_grouping(file_path, value):
 
 
 def write_id3_color(file_path, value):
+    """Write id3 color."""
     try:
         tags = ID3(file_path)
     except ID3NoHeaderError:
@@ -84,6 +90,7 @@ def write_id3_color(file_path, value):
 
 
 def clear_id3_grouping(file_path):
+    """Clear id3 grouping."""
     try:
         tags = ID3(file_path)
     except ID3NoHeaderError:
@@ -94,6 +101,7 @@ def clear_id3_grouping(file_path):
 
 
 def clear_id3_color(file_path):
+    """Clear id3 color."""
     try:
         tags = ID3(file_path)
     except ID3NoHeaderError:

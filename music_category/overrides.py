@@ -8,6 +8,7 @@ FIELDNAMES = ["file_path", "file_name", "artist", "title", "manual_grouping", "m
 
 
 def read_overrides(path):
+    """Read overrides."""
     override_path = Path(path)
     if not override_path.exists():
         return {}
@@ -17,6 +18,7 @@ def read_overrides(path):
 
 
 def apply_overrides(rows, path):
+    """Apply overrides."""
     overrides = read_overrides(path)
     for row in rows:
         override = overrides.get(row.get("file_path", ""))
@@ -34,6 +36,7 @@ def apply_overrides(rows, path):
 
 
 def upsert_override(path, row, manual_grouping, manual_color="", note=""):
+    """Provide upsert override behavior."""
     overrides = read_overrides(path)
     file_path = row.get("file_path", "")
     overrides[file_path] = {
@@ -50,6 +53,7 @@ def upsert_override(path, row, manual_grouping, manual_color="", note=""):
 
 
 def write_overrides(path, rows):
+    """Write overrides."""
     override_path = Path(path)
     override_path.parent.mkdir(parents=True, exist_ok=True)
     with override_path.open("w", encoding="utf-8", newline="") as handle:

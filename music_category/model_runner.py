@@ -9,6 +9,7 @@ FULL_TRACK_CACHE_SUFFIX = "::full_track"
 
 
 def model_cache_key(row, full_track=False, model_id=None):
+    """Provide model cache key behavior."""
     file_path = row["file_path"]
     model_id = model_id or audio_model.MODEL_ID
     if not full_track and model_id == audio_model.MODEL_ID:
@@ -18,6 +19,7 @@ def model_cache_key(row, full_track=False, model_id=None):
 
 
 def cached_model_results(rows, progress_path, full_track=False, model_id=None):
+    """Provide cached model results behavior."""
     cached = progress.load_progress(progress_path)
     for row in rows:
         result = cached.get(model_cache_key(row, full_track, model_id))
@@ -38,6 +40,7 @@ def run_model_analysis(
     full_track=False,
     model_id=None,
 ):
+    """Run model analysis."""
     from transformers import pipeline
 
     model_id = (model_id or audio_model.MODEL_ID).strip() or audio_model.MODEL_ID

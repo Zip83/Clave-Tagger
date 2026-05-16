@@ -2,6 +2,7 @@ from . import config
 
 
 def parse_score_pairs(value):
+    """Parse score pairs."""
     scores = {}
     for part in (value or "").split(";"):
         part = part.strip()
@@ -16,6 +17,7 @@ def parse_score_pairs(value):
 
 
 def parse_top_label_scores(value):
+    """Parse top label scores."""
     scores = {}
     for part in (value or "").split(","):
         part = part.strip()
@@ -30,6 +32,7 @@ def parse_top_label_scores(value):
 
 
 def learned_features(row):
+    """Provide learned features behavior."""
     features = {}
     for category, score in parse_score_pairs(row.get("model_audio_category_scores", "")).items():
         features[f"category_score:{category}"] = score
@@ -49,6 +52,7 @@ def learned_features(row):
 
 
 def truth_category(row, truth_column="id3_grouping_normalized"):
+    """Provide truth category behavior."""
     truth = row.get(truth_column, "")
     values = [part.strip() for part in truth.split(";") if part.strip()]
     values = [config.normalize_value_to_category(value) for value in values]
@@ -57,6 +61,7 @@ def truth_category(row, truth_column="id3_grouping_normalized"):
 
 
 def train_classifier(rows, output_path, truth_column="id3_grouping_normalized", progress_callback=None, cancel_token=None):
+    """Train classifier."""
     from joblib import dump
     from sklearn.feature_extraction import DictVectorizer
     from sklearn.linear_model import LogisticRegression
@@ -200,6 +205,7 @@ def train_classifier(rows, output_path, truth_column="id3_grouping_normalized", 
 
 
 def run_learned_analysis(rows, classifier_path, progress_callback=None, cancel_token=None):
+    """Run learned analysis."""
     from joblib import load
 
     payload = load(classifier_path)

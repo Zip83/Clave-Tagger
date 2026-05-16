@@ -37,7 +37,10 @@ Keep responsibilities separated:
 - `music_category/cli.py`: CLI command orchestration.
 - `music_category/report.py`: compatibility facade that re-exports public functions.
 - `music_category/gui_services.py`: GUI-facing service layer, testable without Tkinter.
-- `music_category_gui.py`: Tkinter UI only: widgets, worker thread, queue, table, logs, and playback wiring.
+- `music_category/gui_dialogs.py`: GUI dialogs and secondary result windows.
+- `music_category/gui_playback.py`: GUI playback, seek, and external-player fallback logic.
+- `music_category/gui_table.py`: GUI virtual table rendering, filtering, sorting, and row-state helpers.
+- `music_category_gui.py`: Tkinter shell only: widget composition, state variables, worker thread, queue, and high-level wiring.
 - `tests/`: unit tests.
 
 When adding features, prefer adding logic to a focused module or service function. Avoid putting business logic directly into `music_category_gui.py`.
@@ -108,6 +111,7 @@ Keep the GUI thin:
 
 - Build widgets in `music_category_gui.py`.
 - Put workflow logic in `music_category/gui_services.py`.
+- Put dialog, playback, and virtual table helpers in their focused GUI modules.
 - Keep tag writing, report generation, training, calibration, and evaluation outside widget callbacks when possible.
 
 When adding GUI features, add unit-testable service logic first, then wire it into the UI.
@@ -160,6 +164,7 @@ Use mocks for slow or external behavior. Put GUI workflow tests against `music_c
 ## Code Style
 
 - Keep modules small and responsibility-focused.
+- Add short docstrings or comments to public functions, service functions, GUI methods, and non-obvious helpers.
 - Prefer plain functions and dataclasses unless a class adds real state or behavior.
 - Keep compatibility imports in `music_category_report.py` working for the GUI and existing scripts.
 - Use config-driven behavior for style/category additions.

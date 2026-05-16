@@ -1,4 +1,5 @@
 def parse_priority(priority):
+    """Parse priority."""
     if not priority:
         return ["manual", "learned", "tags", "model"]
     values = [part.strip().lower() for part in priority.split(",") if part.strip()]
@@ -7,6 +8,7 @@ def parse_priority(priority):
 
 
 def recommendation_sources_for_mode(mode, priority=None):
+    """Provide recommendation sources for mode behavior."""
     if mode == "tags":
         return ["tags"]
     if mode == "model":
@@ -19,10 +21,12 @@ def recommendation_sources_for_mode(mode, priority=None):
 
 
 def confidence_rank(confidence):
+    """Provide confidence rank behavior."""
     return {"high": 3, "medium": 2, "low": 1, "review": 0, "": 0}.get(confidence, 0)
 
 
 def confidence_aware_sources(row, mode):
+    """Provide confidence aware sources behavior."""
     if row.get("manual_grouping"):
         return ["manual"]
     candidates = []
@@ -46,6 +50,7 @@ def confidence_aware_sources(row, mode):
 
 
 def choose_recommendation(row, mode, priority=None):
+    """Choose recommendation."""
     values = {
         "manual": (row.get("manual_grouping", ""), "high" if row.get("manual_grouping") else ""),
         "learned": (row.get("learned_suggested_grouping", ""), row.get("learned_confidence", "")),
@@ -61,6 +66,7 @@ def choose_recommendation(row, mode, priority=None):
 
 
 def apply_recommendations(rows, mode, priority=None):
+    """Apply recommendations."""
     for row in rows:
         category, source, confidence = choose_recommendation(row, mode, priority)
         row["recommended_grouping"] = category

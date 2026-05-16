@@ -4,7 +4,9 @@ from . import app_paths, audio_model, classifier_presets
 
 
 def build_parser():
+    """Build parser."""
     class HelpFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+        """Provide HelpFormatter behavior."""
         pass
 
     parser = argparse.ArgumentParser(

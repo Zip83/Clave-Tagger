@@ -7,10 +7,12 @@ ES_SYSTEM_REQUIRED = 0x00000001
 
 
 def is_windows():
+    """Provide is windows behavior."""
     return platform.system().lower() == "windows"
 
 
 def prevent_sleep():
+    """Provide prevent sleep behavior."""
     if not is_windows():
         return False
     result = ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)
@@ -18,6 +20,7 @@ def prevent_sleep():
 
 
 def allow_sleep():
+    """Provide allow sleep behavior."""
     if not is_windows():
         return False
     result = ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS)

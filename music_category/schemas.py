@@ -45,6 +45,7 @@ DETAIL_FIELDNAMES = [
 
 
 def empty_prediction_fields():
+    """Provide empty prediction fields behavior."""
     return {
         "tag_suggested_grouping": "",
         "tag_confidence": "",

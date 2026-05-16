@@ -29,6 +29,7 @@ VALUE_TO_CATEGORY = {}
 
 
 def normalize_text(value):
+    """Normalize text."""
     value = value or ""
     value = unicodedata.normalize("NFKD", value.lower())
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
@@ -36,10 +37,12 @@ def normalize_text(value):
 
 
 def config_key(value):
+    """Provide config key behavior."""
     return normalize_text((value or "").replace("#", "hash "))
 
 
 def load_category_config(config_path):
+    """Load category config."""
     global CATEGORY_CONFIG, CATEGORY_TO_GROUPING, CATEGORY_TO_COLOR, VALUE_TO_CATEGORY
     path = Path(config_path)
     bundled_path = Path(__file__).resolve().parent.parent / "category_config.json"
@@ -67,14 +70,17 @@ def load_category_config(config_path):
 
 
 def category_items():
+    """Provide category items behavior."""
     return CATEGORY_CONFIG.get("categories", [])
 
 
 def text_classification_config():
+    """Provide text classification config behavior."""
     return CATEGORY_CONFIG.get("text_classification", {})
 
 
 def find_category_item(category):
+    """Provide find category item behavior."""
     for item in category_items():
         if item.get("category") == category:
             return item
@@ -82,11 +88,13 @@ def find_category_item(category):
 
 
 def normalize_value_to_category(value):
+    """Normalize value to category."""
     key = config_key(value)
     return VALUE_TO_CATEGORY.get(key, value.strip() if value else "")
 
 
 def normalize_grouping(value):
+    """Normalize grouping."""
     normalized = []
     for part in (value or "").split(";"):
         normalized.append(normalize_value_to_category(part.strip()))
@@ -95,20 +103,24 @@ def normalize_grouping(value):
 
 
 def normalize_color(value):
+    """Normalize color."""
     return normalize_value_to_category(value)
 
 
 def category_to_grouping(value):
+    """Provide category to grouping behavior."""
     category = normalize_value_to_category(value)
     return CATEGORY_TO_GROUPING.get(category, value.strip() if value else "")
 
 
 def category_to_color(value):
+    """Provide category to color behavior."""
     category = normalize_value_to_category(value)
     return CATEGORY_TO_COLOR.get(category, value.strip() if value else "")
 
 
 def pattern_matches(text, pattern):
+    """Provide pattern matches behavior."""
     normalized_pattern = normalize_text(pattern)
     if not normalized_pattern:
         return False
@@ -116,6 +128,7 @@ def pattern_matches(text, pattern):
 
 
 def model_label_specs(item):
+    """Provide model label specs behavior."""
     specs = []
     for spec in item.get("model_labels", []):
         if isinstance(spec, dict):

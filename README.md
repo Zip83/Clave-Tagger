@@ -6,6 +6,10 @@ This is a hobby project built for personal DJ-library cleanup. It does not guara
 
 The app is safe by default. MP3 files are never modified unless `--apply-write` is passed in the CLI or the GUI write action is explicitly applied.
 
+## AI Assistance Disclosure
+
+ClaveTagger was built and iterated with help from AI coding assistants. The project still needs normal human review, testing, and judgment before use, especially before writing tags to a real music library.
+
 ## Fresh Install
 
 Install Python 3.12, then create a local virtual environment in the project folder:
@@ -183,6 +187,8 @@ The GUI window title is `ClaveTagger`. It supports the same main workflows as th
 - Play selected tracks through the optional in-app player, with external-player fallback.
 
 Long-running work runs outside the Tkinter main thread. The table highlights the current row, marks completed / review rows, updates `Processed X/Y`, and supports cooperative abort.
+
+The GUI and CLI share the same service/business modules where practical. GUI-specific responsibilities are split so dialog windows, playback controls, virtual table behavior, and workflow services can be maintained independently.
 
 The GUI remembers analysis, training, model, output, and write-option settings in `settings/gui_settings.json` between launches. It intentionally does not remember selected source folders or loaded tracks, so reopening the app does not unexpectedly scan an old library. Dangerous write execution is still opt-in; `Apply write` is not restored as enabled.
 

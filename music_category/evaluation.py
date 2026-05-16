@@ -1,4 +1,5 @@
 def evaluate_rows(rows, prediction_column, truth_column):
+    """Evaluate rows."""
     comparable = []
     for row in rows:
         truth = row.get(truth_column, "")
@@ -21,6 +22,7 @@ def evaluate_rows(rows, prediction_column, truth_column):
 
 
 def evaluate_available_predictions(rows, truth_column):
+    """Evaluate available predictions."""
     columns = [
         ("tags", "tag_suggested_grouping"),
         ("model", "model_audio_suggested_grouping"),

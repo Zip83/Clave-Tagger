@@ -11,6 +11,7 @@ MIN_FULL_TRACK_CHUNK_SECONDS = 5.0
 
 
 def top_score(results, label):
+    """Provide top score behavior."""
     for item in results:
         if item["label"] == label:
             return float(item["score"])
@@ -18,10 +19,12 @@ def top_score(results, label):
 
 
 def score_sum(results, labels):
+    """Provide score sum behavior."""
     return sum(top_score(results, label) for label in labels)
 
 
 def estimate_bpm(audio):
+    """Estimate bpm."""
     import librosa
 
     tempo, _ = librosa.beat.beat_track(y=audio, sr=SAMPLE_RATE, units="time")
@@ -35,6 +38,7 @@ def estimate_bpm(audio):
 
 
 def confidence_from_score(score, margin):
+    """Provide confidence from score behavior."""
     if score >= 0.035 and margin >= 0.012:
         return "high"
     if score >= 0.018 and margin >= 0.005:
@@ -45,6 +49,7 @@ def confidence_from_score(score, margin):
 
 
 def classify_from_model(results, bpm):
+    """Classify from model."""
     scores = {}
     for item in config.category_items():
         category = item.get("category", "")
@@ -79,10 +84,12 @@ def classify_from_model(results, bpm):
 
 
 def _classifier_results(classifier, audio):
+    """Provide classifier results behavior."""
     return sorted(classifier(audio), key=lambda item: float(item["score"]), reverse=True)
 
 
 def _average_results(results_by_chunk):
+    """Provide average results behavior."""
     scores = {}
     counts = {}
     for results in results_by_chunk:
@@ -99,6 +106,7 @@ def _average_results(results_by_chunk):
 
 
 def _analyze_clip(classifier, file_path):
+    """Analyze clip."""
     (audio, _sample_rate), caught, stderr_output = audio_decode.load_audio(
         file_path,
         sample_rate=SAMPLE_RATE,
@@ -114,6 +122,7 @@ def _analyze_clip(classifier, file_path):
 
 
 def _analyze_full_track(classifier, file_path, cancel_token=None):
+    """Analyze full track."""
     (audio, _sample_rate), caught, stderr_output = audio_decode.load_audio(
         file_path,
         sample_rate=SAMPLE_RATE,
@@ -141,6 +150,7 @@ def _analyze_full_track(classifier, file_path, cancel_token=None):
 
 
 def analyze_audio(classifier, file_path, full_track=False, cancel_token=None, model_id=MODEL_ID):
+    """Analyze audio."""
     if full_track:
         _audio, bpm, results, caught, stderr_output, chunk_count = _analyze_full_track(classifier, file_path, cancel_token)
     else:

@@ -47,6 +47,7 @@ TITLE_JUNK_PATTERNS = (
 
 @dataclass
 class LabelTrack:
+    """Provide LabelTrack behavior."""
     playlist_path: str
     playlist_name: str
     category: str
@@ -60,6 +61,7 @@ class LabelTrack:
 
 
 def clean_title(value):
+    """Provide clean title behavior."""
     text = Path(value or "").stem
     text = re.sub(r"\[[^\]]*(official|video|lyric|audio|hd|hq|www|mimp3|vmusice|genteflow)[^\]]*\]", " ", text, flags=re.I)
     text = re.sub(r"\([^\)]*(official|video|lyric|audio|hd|hq|www|mimp3|vmusice|genteflow)[^\)]*\)", " ", text, flags=re.I)
@@ -69,17 +71,20 @@ def clean_title(value):
 
 
 def clean_artist(value):
+    """Provide clean artist behavior."""
     text = value or ""
     text = re.sub(r"\b(feat|ft|featuring|con|with)\b.*$", " ", text, flags=re.I)
     return config.normalize_text(text)
 
 
 def primary_artist(value):
+    """Provide primary artist behavior."""
     text = re.split(r"\s*(?:,|&|/|\+|\bx\b|\band\b|\by\b)\s*", value or "", maxsplit=1, flags=re.I)[0]
     return clean_artist(text)
 
 
 def split_artist_title(value):
+    """Provide split artist title behavior."""
     text = Path(value or "").stem
     parts = re.split(r"\s+-\s+", text, maxsplit=1)
     if len(parts) == 2:
@@ -88,6 +93,7 @@ def split_artist_title(value):
 
 
 def extract_year(*values):
+    """Provide extract year behavior."""
     for value in values:
         match = re.search(r"\b(19[4-9]\d|20[0-3]\d)\b", value or "")
         if match:
@@ -96,6 +102,7 @@ def extract_year(*values):
 
 
 def ratio(left, right):
+    """Provide ratio behavior."""
     left = left or ""
     right = right or ""
     if not left or not right:
@@ -108,6 +115,7 @@ def ratio(left, right):
 
 
 def category_from_playlist_name(playlist_name, explicit_category=""):
+    """Provide category from playlist name behavior."""
     if explicit_category:
         return config.normalize_value_to_category(explicit_category)
     patterns = config.CATEGORY_CONFIG.get("playlist_label_patterns", {})
@@ -119,6 +127,7 @@ def category_from_playlist_name(playlist_name, explicit_category=""):
 
 
 def label_track_from_values(playlist_path, playlist_name, category, artist="", title="", album="", year="", duration=""):
+    """Provide label track from values behavior."""
     category = category_from_playlist_name(playlist_name, category)
     grouping = config.category_to_grouping(category)
     color = config.category_to_color(category)
@@ -137,6 +146,7 @@ def label_track_from_values(playlist_path, playlist_name, category, artist="", t
 
 
 def _row_value(row, *names):
+    """Provide row value behavior."""
     lowered = {key.lower().strip(): value for key, value in row.items()}
     for name in names:
         value = lowered.get(name.lower())
@@ -146,6 +156,7 @@ def _row_value(row, *names):
 
 
 def _attr_value(element, *names):
+    """Provide attr value behavior."""
     attrs = {key.lower().strip(): value for key, value in element.attrib.items()}
     for name in names:
         value = attrs.get(name.lower())
@@ -155,6 +166,7 @@ def _attr_value(element, *names):
 
 
 def _child_attr_value(element, child_name, *names):
+    """Provide child attr value behavior."""
     for child in element:
         if child.tag.lower().endswith(child_name.lower()):
             value = _attr_value(child, *names)
@@ -164,6 +176,7 @@ def _child_attr_value(element, child_name, *names):
 
 
 def read_csv_playlist(path, explicit_category=""):
+    """Read csv playlist."""
     with Path(path).open("r", encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
     tracks = []
@@ -184,6 +197,7 @@ def read_csv_playlist(path, explicit_category=""):
 
 
 def read_xml_playlist(path, explicit_category=""):
+    """Read xml playlist."""
     tree = ET.parse(path)
     playlist_name = Path(path).stem
     tracks = []
@@ -205,6 +219,7 @@ def read_xml_playlist(path, explicit_category=""):
 
 
 def read_m3u_playlist(path, explicit_category=""):
+    """Read m3u playlist."""
     playlist_name = Path(path).stem
     tracks = []
     pending_duration = ""
@@ -236,6 +251,7 @@ def read_m3u_playlist(path, explicit_category=""):
 
 
 def read_label_playlist(path, explicit_category=""):
+    """Read label playlist."""
     suffix = Path(path).suffix.lower()
     if suffix == ".csv":
         return read_csv_playlist(path, explicit_category)
@@ -247,6 +263,7 @@ def read_label_playlist(path, explicit_category=""):
 
 
 def local_identity(row):
+    """Provide local identity behavior."""
     artist = row.get("artist") or ""
     title = row.get("title") or ""
     album = row.get("album") or ""
@@ -269,6 +286,7 @@ def local_identity(row):
 
 
 def score_match(label, row):
+    """Provide score match behavior."""
     local = local_identity(row)
     label_artist = clean_artist(label.artist)
     label_primary_artist = primary_artist(label.artist)
@@ -301,6 +319,7 @@ def score_match(label, row):
 
 
 def best_match(label, local_rows):
+    """Provide best match behavior."""
     scored = []
     for row in local_rows:
         score, reason = score_match(label, row)
@@ -311,6 +330,7 @@ def best_match(label, local_rows):
 
 
 def match_label_tracks(label_tracks, local_rows, min_score=0.94):
+    """Match label tracks."""
     output_rows = []
     for label in label_tracks:
         matches = best_match(label, local_rows)
@@ -336,6 +356,7 @@ def match_label_tracks(label_tracks, local_rows, min_score=0.94):
 
 
 def match_output_row(label, row, score, confidence, reason, target_grouping="", target_color=""):
+    """Match output row."""
     row = row or {}
     local = local_identity(row) if row else {"year": ""}
     if target_grouping and confidence == "high":
@@ -371,6 +392,7 @@ def match_output_row(label, row, score, confidence, reason, target_grouping="", 
 
 
 def load_label_playlists(paths, explicit_category=""):
+    """Load label playlists."""
     tracks = []
     for path in paths:
         tracks.extend(read_label_playlist(path, explicit_category))
