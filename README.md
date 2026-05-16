@@ -2,6 +2,8 @@
 
 ClaveTagger is a local MP3 categorization tool for Latin DJ libraries. It reads ID3 metadata, suggests configured music categories, can analyze audio with the MAEST Discogs model, can train local classifiers from already tagged files, and can write reviewed `Grouping` / `Color` tags back to MP3 files.
 
+This is a hobby project built for personal DJ-library cleanup. It does not guarantee correct genre classification, BPM detection, model predictions, playlist matching, or tag-writing behavior. Treat every suggestion as a draft, review important changes manually, and keep backups of music files before applying tag writes.
+
 The app is safe by default. MP3 files are never modified unless `--apply-write` is passed in the CLI or the GUI write action is explicitly applied.
 
 ## Fresh Install
@@ -421,6 +423,8 @@ Evaluation prints the selected prediction column and also compares available tag
 ## Writing Tags
 
 All write commands are dry-run unless `--apply-write` is passed.
+
+Tag writing changes MP3 metadata in place. Use dry-runs first, review the planned changes, and keep your own backup when working with a valuable music library.
 
 Dry-run `Grouping` only:
 
