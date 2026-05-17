@@ -4,7 +4,9 @@ from . import app_paths, audio_model, classifier_presets
 
 
 def build_parser():
+    """Build parser."""
     class HelpFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+        """HelpFormatter."""
         pass
 
     parser = argparse.ArgumentParser(
@@ -35,12 +37,12 @@ def build_parser():
     parser.add_argument("--evaluate", action="store_true", help="Compare prediction column against a truth column.")
     parser.add_argument("--prediction-column", default="recommended_grouping", help="Prediction column for --evaluate.")
     parser.add_argument("--truth-column", default="id3_grouping_normalized", help="Truth column for --evaluate.")
-    parser.add_argument("--train-classifier", action="store_true", help="Train a local classifier from existing Grouping tags and model feature columns.")
+    parser.add_argument("--train-classifier", action="store_true", help="Train a local classifier from existing Grouping tags. Light uses report/detail features; heavy trains from audio.")
     parser.add_argument("--classifier-preset", choices=classifier_presets.choices(), default="", help="Optional training preset: light, heavy-fast, heavy-balanced, or heavy-thorough.")
     parser.add_argument("--classifier-backend", choices=["light", "heavy", "auto"], default="light", help="Classifier backend for training or learned analysis.")
-    parser.add_argument("--classifier-output", default=str(app_paths.DEFAULT_LIGHT_CLASSIFIER), help="Output path for --train-classifier.")
-    parser.add_argument("--classifier-input", help="Optional detail CSV to merge feature columns before training.")
-    parser.add_argument("--use-classifier", help="Path to a learned classifier joblib used by --mode learned/all.")
+    parser.add_argument("--classifier-output", default=str(app_paths.DEFAULT_LIGHT_CLASSIFIER), help="Output path for --train-classifier: .joblib for light, .pt for heavy.")
+    parser.add_argument("--classifier-input", help="Optional details CSV for light training feature columns.")
+    parser.add_argument("--use-classifier", help="Path to a learned classifier file used by --mode learned/all: .joblib light or .pt heavy.")
     parser.add_argument("--heavy-epochs", type=int, default=8, help="Epoch count for --classifier-backend heavy.")
     parser.add_argument("--heavy-batch-size", type=int, default=8, help="Batch size for --classifier-backend heavy.")
     parser.add_argument("--heavy-learning-rate", type=float, default=1e-3, help="Learning rate for --classifier-backend heavy.")
@@ -60,5 +62,5 @@ def build_parser():
     parser.add_argument("--color-column", help="CSV column used as target Color value for --write-tags-from-csv.")
     parser.add_argument("--apply-write", action="store_true", help="Actually write MP3 tags. Without this, write mode is dry-run.")
     parser.add_argument("--only-when-empty", action="store_true", help="In write mode, skip files that already have Grouping.")
-    parser.add_argument("--write-after-report", action="store_true", help="After writing report, write Grouping using --value-column.")
+    parser.add_argument("--write-after-report", action="store_true", help="After writing a report, run the write workflow as a dry-run using --value-column and optional color column.")
     return parser

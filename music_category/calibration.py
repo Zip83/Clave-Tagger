@@ -6,10 +6,12 @@ from . import config, csv_io
 
 
 def row_truth_values(row, truth_column):
+    """Row truth values."""
     return [part.strip() for part in row.get(truth_column, "").split(";") if part.strip()]
 
 
 def analyze_mismatches(rows, truth_column="id3_grouping_normalized"):
+    """Analyze mismatches."""
     summary = defaultdict(Counter)
     examples = []
     for row in rows:
@@ -40,6 +42,7 @@ def analyze_mismatches(rows, truth_column="id3_grouping_normalized"):
 
 
 def tuned_config_from_summary(summary):
+    """Tuned config from summary."""
     tuned = json.loads(json.dumps(config.CATEGORY_CONFIG, ensure_ascii=False))
     notes = []
     for source, counter in summary.items():
@@ -59,6 +62,7 @@ def tuned_config_from_summary(summary):
 
 
 def calibrate_from_csv(input_csv, calibration_output, mismatch_output=None, truth_column="id3_grouping_normalized"):
+    """Calibrate from csv."""
     rows = csv_io.read_rows_from_csv(input_csv)
     summary, examples = analyze_mismatches(rows, truth_column)
     tuned = tuned_config_from_summary(summary)

@@ -10,6 +10,7 @@ from . import app_logging
 
 
 def _detect_with_torch(classifier_path):
+    """Detect with torch."""
     import torch
 
     payload = torch.load(classifier_path, map_location="cpu")
@@ -19,6 +20,7 @@ def _detect_with_torch(classifier_path):
 
 
 def _detect_with_joblib(classifier_path):
+    """Detect with joblib."""
     from joblib import load
 
     payload = load(classifier_path)
@@ -35,6 +37,7 @@ def train_classifier_backend(
     progress_callback=None,
     **options,
 ):
+    """Train classifier backend."""
     if backend == "light":
         return train_classifier(
             rows,
@@ -62,6 +65,7 @@ def train_classifier_backend(
 
 
 def detect_classifier_backend(classifier_path):
+    """Detect classifier backend."""
     suffix = str(classifier_path).lower().rsplit(".", 1)[-1] if "." in str(classifier_path) else ""
     loaders = [_detect_with_torch, _detect_with_joblib] if suffix in {"pt", "pth"} else [_detect_with_joblib, _detect_with_torch]
     for loader in loaders:
@@ -76,6 +80,7 @@ def detect_classifier_backend(classifier_path):
 
 
 def run_learned_analysis_backend(rows, classifier_path, backend="auto", progress_callback=None, cancel_token=None):
+    """Run learned analysis backend."""
     detected_backend = detect_classifier_backend(classifier_path)
     if backend == "auto":
         backend = detected_backend

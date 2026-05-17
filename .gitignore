@@ -40,6 +40,14 @@ huggingface/
 *.pt
 music_category_report_progress.json
 
+# Build / release artifacts
+build/
+dist/
+release/
+/release
+*.spec
+ClaveTagger-windows-x64-*.zip
+
 # Editor / OS
 .DS_Store
 Thumbs.db

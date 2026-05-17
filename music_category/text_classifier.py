@@ -20,6 +20,7 @@ DEFAULT_TEXT_RULES = {
 
 
 def _text_rules():
+    """Text rules."""
     configured = config.text_classification_config()
     rules = dict(DEFAULT_TEXT_RULES)
     rules["weights"] = {**DEFAULT_TEXT_RULES["weights"], **configured.get("weights", {})}
@@ -34,6 +35,7 @@ def _text_rules():
 
 
 def _split_weak_hits(item, hits):
+    """Split weak hits."""
     weak_patterns = {config.normalize_text(pattern) for pattern in item.get("weak_tag_patterns", [])}
     strong = [hit for hit in hits if config.normalize_text(hit) not in weak_patterns]
     weak = [hit for hit in hits if config.normalize_text(hit) in weak_patterns]
@@ -41,6 +43,7 @@ def _split_weak_hits(item, hits):
 
 
 def _add_hits(score, reasons, label, strong_hits, weak_hits, strong_weight, weak_weight):
+    """Add hits."""
     if strong_hits:
         score += strong_weight
         reasons.append(f"{label} matched {', '.join(str(hit) for hit in strong_hits[:3])}")
@@ -51,6 +54,7 @@ def _add_hits(score, reasons, label, strong_hits, weak_hits, strong_weight, weak
 
 
 def classify_from_tags(row):
+    """Classify from tags."""
     rules = _text_rules()
     weights = rules["weights"]
     genre = config.normalize_text(row.get("genre", ""))

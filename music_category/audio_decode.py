@@ -8,6 +8,7 @@ from . import app_logging
 
 @contextlib.contextmanager
 def _capture_native_stderr():
+    """Capture native stderr."""
     original_fd = None
     temp = None
     capture_failed = False
@@ -28,6 +29,7 @@ def _capture_native_stderr():
 
 
 def _read_captured_stderr(temp):
+    """Read captured stderr."""
     if temp is None:
         return ""
     temp.flush()
@@ -38,6 +40,7 @@ def _read_captured_stderr(temp):
 
 
 def run_with_decode_capture(file_path, operation):
+    """Run with decode capture."""
     caught = []
     stderr_output = ""
     stderr_temp = None
@@ -69,6 +72,7 @@ def run_with_decode_capture(file_path, operation):
 
 
 def load_audio(file_path, sample_rate, mono=True, offset=0.0, duration=None):
+    """Load audio."""
     import librosa
 
     return run_with_decode_capture(
@@ -84,6 +88,7 @@ def load_audio(file_path, sample_rate, mono=True, offset=0.0, duration=None):
 
 
 def get_duration(file_path):
+    """Get duration."""
     import librosa
 
     return run_with_decode_capture(file_path, lambda: float(librosa.get_duration(path=str(file_path))))

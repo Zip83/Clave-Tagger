@@ -38,14 +38,17 @@ PRESETS = {
 
 
 def choices():
+    """Choices."""
     return list(PRESETS)
 
 
 def label_for(name):
+    """Label for."""
     return PRESETS.get(name, {}).get("label", name)
 
 
 def name_for_label(label):
+    """Name for label."""
     for name, preset in PRESETS.items():
         if preset["label"] == label:
             return name
@@ -53,14 +56,17 @@ def name_for_label(label):
 
 
 def labels():
+    """Labels."""
     return [preset["label"] for preset in PRESETS.values()]
 
 
 def get(name):
+    """Get."""
     return PRESETS.get(name_for_label(name), PRESETS["light"])
 
 
 def apply_to_namespace(args):
+    """Apply to namespace."""
     name = getattr(args, "classifier_preset", "") or ""
     if not name:
         return

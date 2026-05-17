@@ -9,6 +9,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 def apply_missing_tag_predictions(rows, mode, priority):
+    """Apply missing tag predictions."""
     if mode not in MODES_THAT_USE_TAGS:
         return
     for row in rows:
@@ -21,14 +22,17 @@ def apply_missing_tag_predictions(rows, mode, priority):
 
 
 def has_existing_grouping(row):
+    """Has existing grouping."""
     return bool(str(row.get("id3_grouping_normalized") or row.get("id3_grouping") or "").strip())
 
 
 def rows_missing_grouping(rows):
+    """Rows missing grouping."""
     return [row for row in rows if not has_existing_grouping(row)]
 
 
 def train_if_requested(args, parser, rows, classifier_path):
+    """Train if requested."""
     if not args.train_classifier:
         return classifier_path
     classifier_presets.apply_to_namespace(args)
@@ -38,6 +42,7 @@ def train_if_requested(args, parser, rows, classifier_path):
         args.classifier_output = str(app_paths.DEFAULT_HEAVY_CLASSIFIER)
     artifacts.prepare_artifacts("train", args, status_callback=print)
     def print_progress(payload):
+        """Print progress."""
         message = payload.get("message")
         if message:
             print(message, flush=True)
@@ -64,6 +69,7 @@ def train_if_requested(args, parser, rows, classifier_path):
 
 
 def main():
+    """Main."""
     parser = build_parser()
     args = parser.parse_args()
     app_paths.ensure_runtime_dirs()

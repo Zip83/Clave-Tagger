@@ -1,7 +1,8 @@
-from . import config
+from . import audio_features, config
 
 
 def parse_score_pairs(value):
+    """Parse score pairs."""
     scores = {}
     for part in (value or "").split(";"):
         part = part.strip()
@@ -16,6 +17,7 @@ def parse_score_pairs(value):
 
 
 def parse_top_label_scores(value):
+    """Parse top label scores."""
     scores = {}
     for part in (value or "").split(","):
         part = part.strip()
@@ -30,6 +32,15 @@ def parse_top_label_scores(value):
 
 
 def learned_features(row):
+    """Build light-classifier features from report/detail columns.
+
+    Args:
+        row: Report row containing model labels, category scores, tag guesses,
+            and optional serialized Librosa audio features.
+
+    Returns:
+        Feature dictionary consumed by scikit-learn.
+    """
     features = {}
     for category, score in parse_score_pairs(row.get("model_audio_category_scores", "")).items():
         features[f"category_score:{category}"] = score
@@ -39,16 +50,12 @@ def learned_features(row):
         features[f"model_guess:{row['model_audio_suggested_grouping']}"] = 1.0
     if row.get("tag_suggested_grouping"):
         features[f"tag_guess:{row['tag_suggested_grouping']}"] = 1.0
-    try:
-        bpm = float(row.get("model_audio_bpm", "") or 0)
-    except ValueError:
-        bpm = 0.0
-    if bpm:
-        features["bpm"] = bpm / 220.0
+    features.update(audio_features.parse_audio_features(row.get("model_audio_features", "")))
     return features
 
 
 def truth_category(row, truth_column="id3_grouping_normalized"):
+    """Truth category."""
     truth = row.get(truth_column, "")
     values = [part.strip() for part in truth.split(";") if part.strip()]
     values = [config.normalize_value_to_category(value) for value in values]
@@ -57,6 +64,7 @@ def truth_category(row, truth_column="id3_grouping_normalized"):
 
 
 def train_classifier(rows, output_path, truth_column="id3_grouping_normalized", progress_callback=None, cancel_token=None):
+    """Train classifier."""
     from joblib import dump
     from sklearn.feature_extraction import DictVectorizer
     from sklearn.linear_model import LogisticRegression
@@ -200,6 +208,7 @@ def train_classifier(rows, output_path, truth_column="id3_grouping_normalized", 
 
 
 def run_learned_analysis(rows, classifier_path, progress_callback=None, cancel_token=None):
+    """Run learned analysis."""
     from joblib import load
 
     payload = load(classifier_path)

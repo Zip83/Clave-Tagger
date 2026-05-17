@@ -1,5 +1,3 @@
-import os
-import io
 import queue
 import threading
 import time
@@ -10,10 +8,15 @@ from tkinter import filedialog, messagebox, ttk
 import music_category_report as core
 from music_category import app_env, app_logging, app_paths, audio_model, audio_model_catalog, classifier_presets, config, gui_services, gui_settings, id3_tags, learning, power, virtual_table
 from music_category.cancel import CancelToken, CancelledError
+from music_category.gui_dialogs import GuiDialogsMixin
+from music_category.gui_playback import GuiPlaybackMixin
+from music_category.gui_table import GuiTableMixin
 
 
 class ToolTip:
+    """ToolTip."""
     def __init__(self, widget, text):
+        """Initialize this object."""
         self.widget = widget
         self.text = text
         self.window = None
@@ -21,6 +24,7 @@ class ToolTip:
         widget.bind("<Leave>", self.hide)
 
     def show(self, _event=None):
+        """Show the requested value."""
         if self.window or not self.text:
             return
         x = self.widget.winfo_rootx() + 20
@@ -32,18 +36,22 @@ class ToolTip:
         label.pack()
 
     def hide(self, _event=None):
+        """Hide."""
         if self.window:
             self.window.destroy()
             self.window = None
 
 
 class HoverText:
+    """HoverText."""
     def __init__(self, owner):
+        """Initialize this object."""
         self.owner = owner
         self.window = None
         self.text = ""
 
     def show_at_pointer(self, text):
+        """Show at pointer."""
         if not text:
             self.hide()
             return
@@ -60,6 +68,7 @@ class HoverText:
         label.pack()
 
     def hide(self, _event=None):
+        """Hide."""
         if self.window:
             self.window.destroy()
             self.window = None
@@ -67,7 +76,9 @@ class HoverText:
 
 
 class MenuToolTip:
+    """MenuToolTip."""
     def __init__(self, root, menu, descriptions):
+        """Initialize this object."""
         self.menu = menu
         self.descriptions = descriptions
         self.hover = HoverText(root)
@@ -76,6 +87,7 @@ class MenuToolTip:
         menu.bind("<Unmap>", self.hover.hide)
 
     def show(self, _event=None):
+        """Show the requested value."""
         try:
             index = self.menu.index("active")
             label = self.menu.entrycget(index, "label") if index is not None else ""
@@ -86,7 +98,9 @@ class MenuToolTip:
 
 
 class NotebookToolTip:
+    """NotebookToolTip."""
     def __init__(self, root, notebook, descriptions):
+        """Initialize this object."""
         self.notebook = notebook
         self.descriptions = descriptions
         self.hover = HoverText(root)
@@ -94,6 +108,7 @@ class NotebookToolTip:
         notebook.bind("<Leave>", self.hover.hide)
 
     def show(self, event):
+        """Show the requested value."""
         try:
             index = self.notebook.index(f"@{event.x},{event.y}")
         except tk.TclError:
@@ -102,8 +117,10 @@ class NotebookToolTip:
         self.hover.show_at_pointer(self.descriptions.get(index, ""))
 
 
-class MusicCategoryGui(tk.Tk):
+class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
+    """MusicCategoryGui."""
     def __init__(self):
+        """Initialize this object."""
         super().__init__()
         self.title(app_paths.APP_NAME)
         self.geometry("1120x660+20+20")
@@ -222,6 +239,7 @@ class MusicCategoryGui(tk.Tk):
         self.after(150, self._poll_queue)
 
     def _build_settings_variables(self):
+        """Build settings variables."""
         return {
             "output_csv": self.output_csv,
             "details_csv": self.details_csv,
@@ -266,21 +284,25 @@ class MusicCategoryGui(tk.Tk):
         }
 
     def _load_gui_settings(self):
+        """Load gui settings."""
         gui_settings.apply_variables(gui_settings.load_settings(), self._settings_variables)
         preset = audio_model_catalog.find_by_label(self.audio_model_preset.get(), self.audio_model_presets)
         if preset:
             self.audio_model_description.set(self._audio_model_description(preset))
 
     def _save_gui_settings(self):
+        """Save gui settings."""
         settings = gui_settings.collect_variables(self._settings_variables)
         settings["apply_write"] = False
         gui_settings.save_settings(settings)
 
     def close_app(self):
+        """Close app."""
         self._save_gui_settings()
         self.destroy()
 
     def _build_ui(self):
+        """Build ui."""
         self._build_menu()
         root = ttk.Frame(self, padding=10)
         root.pack(fill=tk.BOTH, expand=True)
@@ -306,6 +328,7 @@ class MusicCategoryGui(tk.Tk):
         self._build_log_tab()
 
     def _build_menu(self):
+        """Build menu."""
         menu = tk.Menu(self)
         file_menu = tk.Menu(menu, tearoff=False)
         file_menu.add_command(label="Add Folder", command=self.add_folder)
@@ -369,21 +392,25 @@ class MusicCategoryGui(tk.Tk):
         self.config(menu=menu)
 
     def _attach_menu_tooltips(self, menu, descriptions):
+        """Attach menu tooltips."""
         self.menu_tooltips.append(MenuToolTip(self, menu, descriptions))
 
     def _label(self, parent, text, tooltip=""):
+        """Label."""
         label = ttk.Label(parent, text=text)
         if tooltip:
             ToolTip(label, tooltip)
         return label
 
     def _button(self, parent, text, command, tooltip="", **kwargs):
+        """Button."""
         button = ttk.Button(parent, text=text, command=command, **kwargs)
         if tooltip:
             ToolTip(button, tooltip)
         return button
 
     def _labeled_entry(self, parent, label, variable, width=24, tooltip=""):
+        """Labeled entry."""
         label_widget = self._label(parent, label, tooltip)
         label_widget.pack(side=tk.LEFT)
         entry = ttk.Entry(parent, textvariable=variable, width=width)
@@ -391,9 +418,11 @@ class MusicCategoryGui(tk.Tk):
         return entry
 
     def _track_dependency(self, group, *widgets):
+        """Track dependency."""
         self.dependent_widgets.setdefault(group, []).extend(widgets)
 
     def _set_widgets_enabled(self, group, enabled):
+        """Set widgets enabled."""
         for widget in self.dependent_widgets.get(group, []):
             try:
                 state = "readonly" if enabled and widget.winfo_class() == "TCombobox" else "normal"
@@ -404,10 +433,12 @@ class MusicCategoryGui(tk.Tk):
                 pass
 
     def _bind_dependency_refresh(self):
+        """Bind dependency refresh."""
         for variable in (self.mode, self.classifier_backend, self.use_details, self.write_after_report):
             variable.trace_add("write", lambda *_args: self._refresh_dependency_state())
 
     def _refresh_dependency_state(self):
+        """Refresh dependency state."""
         state = gui_services.dependency_state(
             self.mode.get(),
             self.classifier_backend.get(),
@@ -418,6 +449,7 @@ class MusicCategoryGui(tk.Tk):
             self._set_widgets_enabled(group, enabled)
 
     def _build_report_tab(self):
+        """Build report tab."""
         paned = ttk.PanedWindow(self.report_tab, orient=tk.VERTICAL)
         paned.pack(fill=tk.BOTH, expand=True)
         top = ttk.Frame(paned)
@@ -431,12 +463,15 @@ class MusicCategoryGui(tk.Tk):
         self._build_table_and_editor(bottom)
 
     def _build_settings_tab(self):
+        """Build settings tab."""
         self._build_options_groups(self.settings_tab)
 
     def _build_log_tab(self):
+        """Build log tab."""
         self._build_log(self.log_tab, expand=True)
 
     def _build_input_group(self, parent):
+        """Build input group."""
         frame = ttk.LabelFrame(parent, text="Input", padding=10)
         frame.pack(fill=tk.X, pady=(0, 6))
 
@@ -451,6 +486,7 @@ class MusicCategoryGui(tk.Tk):
         ToolTip(frame, "Use the File menu to add folders, manage sources, or open an input CSV.")
 
     def _build_compact_actions(self, parent):
+        """Build compact actions."""
         frame = ttk.Frame(parent)
         frame.pack(fill=tk.X, pady=(0, 6))
         action_row = ttk.Frame(frame)
@@ -467,54 +503,16 @@ class MusicCategoryGui(tk.Tk):
         ttk.Separator(action_row, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=8)
         self._label(action_row, "Playback:", "Controls the selected table row. Playback remains available while analysis is running.").pack(side=tk.LEFT, padx=(0, 5))
         self._play_pause_button(action_row).pack(side=tk.LEFT)
-        self._playback_button(action_row, "■", self.stop_playback).pack(side=tk.LEFT)
-        self._playback_button(action_row, "↗", self.open_selected_external).pack(side=tk.LEFT, padx=(2, 8))
+        self._playback_button(action_row, "Stop", self.stop_playback).pack(side=tk.LEFT)
+        self._playback_button(action_row, "Open", self.open_selected_external).pack(side=tk.LEFT, padx=(2, 8))
         seek = ttk.Scale(action_row, from_=0, to=300, variable=self.playback_seek, orient=tk.HORIZONTAL)
         seek.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
         self._bind_seek_control(seek)
         ToolTip(seek, "Seek within the currently playing track.")
         ttk.Label(action_row, textvariable=self.playback_time, width=13).pack(side=tk.LEFT)
 
-    def _playback_button(self, parent, text, command):
-        tips = {
-            "play_selected": "Play the selected track.",
-            "toggle_play_pause": "Play, pause, or resume the selected track.",
-            "pause_playback": "Pause or resume playback.",
-            "stop_playback": "Stop playback.",
-            "open_selected_external": "Open the selected track in the system player.",
-        }
-        button = self._button(parent, text, command, tips.get(getattr(command, "__name__", ""), "Playback control."), width=3)
-        self.playback_buttons.append(button)
-        return button
-
-    def _play_pause_button(self, parent):
-        button = self._playback_button(parent, "▶", self.toggle_play_pause)
-        self.play_pause_buttons.append(button)
-        return button
-
-    def _update_play_pause_buttons(self):
-        text = "▶" if self.playback_paused or not self.playing_file else "⏸"
-        for button in self.play_pause_buttons:
-            try:
-                button.configure(text=text)
-            except tk.TclError:
-                pass
-
-    def _bind_seek_control(self, scale):
-        self.seek_controls.append(scale)
-        scale.bind("<Button-1>", self._seek_from_pointer)
-        scale.bind("<B1-Motion>", self._preview_seek_from_pointer)
-        scale.bind("<ButtonRelease-1>", self._seek_from_pointer)
-
-    def _set_seek_range(self, duration):
-        maximum = max(float(duration or 0.0), 1.0)
-        for scale in self.seek_controls:
-            try:
-                scale.configure(to=maximum)
-            except tk.TclError:
-                pass
-
     def _build_options_groups(self, parent):
+        """Build options groups."""
         groups = ttk.Notebook(parent)
         groups.pack(fill=tk.X, pady=6)
 
@@ -551,7 +549,7 @@ class MusicCategoryGui(tk.Tk):
         mode_combo.pack(side=tk.LEFT, padx=5)
         full_track = ttk.Checkbutton(r, text="Full-track audio", variable=self.model_full_track)
         full_track.pack(side=tk.LEFT, padx=(4, 8))
-        ToolTip(full_track, "Analyze the whole song by averaging 30s audio-model chunks. Slower, but usually more stable than one 30s clip.")
+        ToolTip(full_track, "Analyze the whole song by averaging 30s audio-model chunks and extracting whole-track Librosa features.")
         self._track_dependency("audio_model", full_track)
         only_missing = ttk.Checkbutton(r, text="Only missing Grouping", variable=self.only_missing_grouping)
         only_missing.pack(side=tk.LEFT, padx=(4, 8))
@@ -607,12 +605,12 @@ class MusicCategoryGui(tk.Tk):
         backend_combo = ttk.Combobox(r, textvariable=self.classifier_backend, values=("light", "heavy", "auto"), state="readonly", width=8)
         backend_combo.pack(side=tk.LEFT, padx=5)
         backend_combo.bind("<<ComboboxSelected>>", self.on_classifier_backend_selected)
-        classifier_use_entry = self._labeled_entry(r, "Use:", self.classifier_path, 24, "Existing classifier file used by learned/all analysis after it has already been trained.")
+        classifier_use_entry = self._labeled_entry(r, "Use classifier:", self.classifier_path, 24, "Existing classifier file used by learned/all analysis after it has already been trained.")
         classifier_use_button = self._button(r, "Browse", self.browse_classifier, "Select a trained classifier file for learned/all analysis.")
         classifier_use_button.pack(side=tk.LEFT)
         self._track_dependency("learned_classifier", classifier_use_entry, classifier_use_button)
         r = ttk.Frame(classifier); r.pack(fill=tk.X, pady=2)
-        classifier_input_entry = self._labeled_entry(r, "Input:", self.classifier_input, 24, "Optional details CSV for light training. It supplies MAEST/model feature columns when the main rows do not have them.")
+        classifier_input_entry = self._labeled_entry(r, "Details CSV:", self.classifier_input, 24, "Optional details CSV for light training. It supplies MAEST/model and Librosa audio feature columns when the main rows do not have them.")
         classifier_input_button = self._button(r, "Browse", self.browse_classifier_input, "Select an optional details CSV used during light training.")
         classifier_input_button.pack(side=tk.LEFT)
         self._track_dependency("light_training", classifier_input_entry, classifier_input_button)
@@ -621,7 +619,7 @@ class MusicCategoryGui(tk.Tk):
         r = ttk.Frame(classifier); r.pack(fill=tk.X, pady=2)
         heavy_epochs_entry = self._labeled_entry(r, "Epochs:", self.heavy_epochs, 5, "Number of heavy-model training passes over the training data.")
         heavy_batch_entry = self._labeled_entry(r, "Batch:", self.heavy_batch_size, 5, "Number of audio chunks processed per training step.")
-        heavy_lr_entry = self._labeled_entry(r, "LR:", self.heavy_learning_rate, 8, "Learning rate for heavy-model training.")
+        heavy_lr_entry = self._labeled_entry(r, "Learning rate:", self.heavy_learning_rate, 8, "Learning rate for heavy-model training.")
         heavy_max_files_entry = self._labeled_entry(r, "Max files:", self.heavy_max_files, 7, "Optional tagged-file limit for experiments. Empty means use all tagged files from the training source.")
         heavy_max_chunks_entry = self._labeled_entry(r, "Max chunks:", self.heavy_max_chunks, 7, "Optional chunks per file. Empty means use the whole song split into 30-second chunks.")
         self._track_dependency("heavy_training", heavy_epochs_entry, heavy_batch_entry, heavy_lr_entry, heavy_max_files_entry, heavy_max_chunks_entry)
@@ -652,6 +650,7 @@ class MusicCategoryGui(tk.Tk):
         }))
 
     def _build_progress_group(self, parent):
+        """Build progress group."""
         frame = ttk.LabelFrame(parent, text="Progress", padding=10)
         frame.pack(fill=tk.X, pady=6)
         ToolTip(frame, "Shows current phase, current file, processed count, ETA, and whether cancellation is pending.")
@@ -662,6 +661,7 @@ class MusicCategoryGui(tk.Tk):
         ttk.Label(frame, textvariable=self.pending_tags_status).pack(fill=tk.X, pady=(2, 0))
 
     def _build_table_and_editor(self, parent):
+        """Build table and editor."""
         table_frame = ttk.Frame(parent)
         table_frame.pack(fill=tk.BOTH, expand=True)
         bulk = ttk.LabelFrame(table_frame, text="Bulk Correction", padding=6)
@@ -704,7 +704,7 @@ class MusicCategoryGui(tk.Tk):
         columns = (
             "file_name", "id3_grouping_normalized", "id3_color", "tag_suggested_grouping",
             "model_audio_suggested_grouping", "learned_suggested_grouping", "recommended_grouping",
-            "target_grouping", "target_color", "recommended_source", "recommended_confidence", "model_audio_bpm",
+            "target_grouping", "target_color", "recommended_source", "recommended_confidence",
         )
         self.tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=8, selectmode="extended")
         headings = {
@@ -712,12 +712,12 @@ class MusicCategoryGui(tk.Tk):
             "tag_suggested_grouping": "Tag Guess", "model_audio_suggested_grouping": "MAEST Guess",
             "learned_suggested_grouping": "Learned Guess", "recommended_grouping": "Recommended",
             "target_grouping": "Target Grouping", "target_color": "Target Color",
-            "recommended_source": "Source", "recommended_confidence": "Confidence", "model_audio_bpm": "BPM",
+            "recommended_source": "Source", "recommended_confidence": "Confidence",
         }
         self.column_headings = dict(headings)
         widths = {"file_name": 240, "id3_grouping_normalized": 115, "id3_color": 95, "tag_suggested_grouping": 110,
                   "model_audio_suggested_grouping": 110, "learned_suggested_grouping": 110, "recommended_grouping": 110,
-                  "target_grouping": 110, "target_color": 95, "recommended_source": 70, "recommended_confidence": 80, "model_audio_bpm": 55}
+                  "target_grouping": 110, "target_color": 95, "recommended_source": 70, "recommended_confidence": 80}
         for column in columns:
             self.tree.heading(column, text=headings[column], command=lambda selected=column: self.toggle_table_sort(selected))
             self.tree.column(column, width=widths[column], stretch=column == "file_name")
@@ -755,6 +755,7 @@ class MusicCategoryGui(tk.Tk):
         self.table_menu.add_command(label="Clear Tags", command=lambda: self.clear_selected_tags(True))
 
     def _build_review_tab(self):
+        """Build review tab."""
         outer = ttk.Frame(self.review_tab)
         outer.pack(fill=tk.BOTH, expand=True)
         editor = ttk.LabelFrame(outer, text="Manual Correction", padding=10)
@@ -780,8 +781,8 @@ class MusicCategoryGui(tk.Tk):
         write_button.pack(fill=tk.X, pady=2)
 
         self._play_pause_button(player).pack(side=tk.LEFT)
-        self._playback_button(player, "■", self.stop_playback).pack(side=tk.LEFT)
-        self._playback_button(player, "↗", self.open_selected_external).pack(side=tk.LEFT, padx=4)
+        self._playback_button(player, "Stop", self.stop_playback).pack(side=tk.LEFT)
+        self._playback_button(player, "Open", self.open_selected_external).pack(side=tk.LEFT, padx=4)
         self.seek = ttk.Scale(player, from_=0, to=300, variable=self.playback_seek, orient=tk.HORIZONTAL)
         self.seek.pack(fill=tk.X, pady=6)
         self._bind_seek_control(self.seek)
@@ -789,12 +790,14 @@ class MusicCategoryGui(tk.Tk):
         ttk.Label(player, textvariable=self.playback_time).pack(anchor="w")
 
     def _build_log(self, parent, expand=False):
+        """Build log."""
         log_frame = ttk.LabelFrame(parent, text="Log", padding=6)
         log_frame.pack(fill=tk.BOTH if expand else tk.X, expand=expand, pady=(8, 0))
         self.log = tk.Text(log_frame, height=12 if expand else 4, wrap="word")
         self.log.pack(fill=tk.BOTH if expand else tk.X, expand=expand)
 
     def _build_write_tab(self):
+        """Build write tab."""
         form = ttk.LabelFrame(self.write_tab, text="Write Grouping / Color from CSV", padding=10)
         form.pack(fill=tk.X)
         row = ttk.Frame(form); row.pack(fill=tk.X, pady=3)
@@ -821,6 +824,7 @@ class MusicCategoryGui(tk.Tk):
         self.write_log.pack(fill=tk.BOTH, expand=True)
 
     def add_folder(self):
+        """Add folder."""
         folder = filedialog.askdirectory(title="Select music folder")
         if folder and folder not in self.source_paths:
             self.source_paths.append(folder)
@@ -828,6 +832,7 @@ class MusicCategoryGui(tk.Tk):
             self.preview_sources()
 
     def add_subfolders_from_parent(self):
+        """Add subfolders from parent."""
         parent = filedialog.askdirectory(title="Select parent folder")
         if not parent:
             return
@@ -840,6 +845,7 @@ class MusicCategoryGui(tk.Tk):
         for path in subfolders:
             listbox.insert(tk.END, path)
         def accept():
+            """Accept."""
             for index in listbox.curselection():
                 path = listbox.get(index)
                 if path not in self.source_paths:
@@ -850,6 +856,7 @@ class MusicCategoryGui(tk.Tk):
         self._button(dialog, "Add Selected", accept, "Add all selected subfolders as recursive sources.").pack(pady=6)
 
     def manage_sources(self):
+        """Manage sources."""
         dialog = tk.Toplevel(self)
         dialog.title("Sources")
         dialog.geometry("760x360")
@@ -857,12 +864,14 @@ class MusicCategoryGui(tk.Tk):
         listbox.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
         def refresh():
+            """Refresh the requested value."""
             listbox.delete(0, tk.END)
             for path in self.source_paths:
                 listbox.insert(tk.END, path)
             self._refresh_folder_list()
 
         def remove_selected():
+            """Remove selected."""
             selected = set(listbox.curselection())
             removed = [path for index, path in enumerate(self.source_paths) if index in selected]
             self.source_paths = [path for index, path in enumerate(self.source_paths) if index not in selected]
@@ -871,6 +880,7 @@ class MusicCategoryGui(tk.Tk):
             self.preview_sources()
 
         def add_one():
+            """Add one."""
             folder = filedialog.askdirectory(title="Select music folder", parent=dialog)
             if folder and folder not in self.source_paths:
                 self.source_paths.append(folder)
@@ -878,6 +888,7 @@ class MusicCategoryGui(tk.Tk):
                 self.preview_sources()
 
         def clear_all():
+            """Clear all."""
             self.source_paths = []
             self.rows = []
             self._clear_table_state()
@@ -893,9 +904,11 @@ class MusicCategoryGui(tk.Tk):
         refresh()
 
     def remove_selected_folders(self):
+        """Remove selected folders."""
         self.manage_sources()
 
     def clear_folders(self):
+        """Clear folders."""
         self.source_paths = []
         self._refresh_folder_list()
         self.rows = []
@@ -903,6 +916,7 @@ class MusicCategoryGui(tk.Tk):
         self.status_label.configure(text="Folders cleared.")
 
     def _refresh_folder_list(self):
+        """Refresh folder list."""
         if not self.source_paths:
             self.source_summary.set("No source selected")
         elif len(self.source_paths) == 1:
@@ -911,38 +925,45 @@ class MusicCategoryGui(tk.Tk):
             self.source_summary.set(f"{len(self.source_paths)} source folders")
 
     def _remove_preview_rows_for_sources(self, removed_sources):
+        """Remove preview rows for sources."""
         if not removed_sources:
             return
         self.rows = gui_services.rows_without_source_folders(self.rows, removed_sources)
         self.message_queue.put(("rows_loaded", self.rows))
 
     def browse_input_csv(self):
+        """Browse for input csv."""
         path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
         if path:
             self.input_csv.set(path)
             self.preview_sources()
 
     def browse_output_csv(self):
+        """Browse for output csv."""
         path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
         if path:
             self.output_csv.set(path)
 
     def browse_details_csv(self):
+        """Browse for details csv."""
         path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
         if path:
             self.details_csv.set(path)
 
     def browse_write_csv(self):
+        """Browse for write csv."""
         path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
         if path:
             self.write_csv.set(path)
 
     def browse_config(self):
+        """Browse for config."""
         path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
         if path:
             self.config_path.set(path)
 
     def _audio_model_description(self, preset):
+        """Audio model description."""
         status = preset.get("status", "")
         model_id = preset.get("model_id") or "no model id"
         return (
@@ -952,6 +973,7 @@ class MusicCategoryGui(tk.Tk):
         ).strip()
 
     def on_audio_model_preset_selected(self, _event=None):
+        """On audio model preset selected."""
         preset = audio_model_catalog.find_by_label(self.audio_model_preset.get(), self.audio_model_presets)
         if not preset:
             return
@@ -967,9 +989,11 @@ class MusicCategoryGui(tk.Tk):
                 self.mode.set("model")
 
     def show_audio_model_catalog(self):
+        """Show audio model catalog."""
         messagebox.showinfo("Audio model presets", audio_model_catalog.format_catalog(self.audio_model_presets))
 
     def reload_env_file(self, show_status=True):
+        """Reload env file."""
         status = app_env.load_env_file(self.env_file.get().strip() or ".env")
         self.hf_token_status.set(f"HF token: {app_env.hf_token_status()}")
         message = app_env.env_status_message(status)
@@ -979,6 +1003,7 @@ class MusicCategoryGui(tk.Tk):
             self._append_log(message)
 
     def on_classifier_preset_selected(self, _event=None):
+        """On classifier preset selected."""
         preset = classifier_presets.get(self.classifier_preset.get())
         self.classifier_backend.set(preset["backend"])
         self._sync_classifier_paths_for_backend(preset["backend"])
@@ -991,10 +1016,12 @@ class MusicCategoryGui(tk.Tk):
         self.status_label.configure(text=preset["description"])
 
     def on_classifier_backend_selected(self, _event=None):
+        """On classifier backend selected."""
         backend = self.classifier_backend.get()
         self._sync_classifier_paths_for_backend(backend)
 
     def _sync_classifier_paths_for_backend(self, backend):
+        """Synchronize classifier paths for backend."""
         classifier_path, classifier_output = gui_services.sync_classifier_paths_for_backend(
             backend,
             self.classifier_path.get().strip(),
@@ -1003,290 +1030,34 @@ class MusicCategoryGui(tk.Tk):
         self.classifier_path.set(classifier_path)
         self.classifier_output.set(classifier_output)
 
-    def show_model_comparison_window(self, comparison_rows, fieldnames):
-        window = tk.Toplevel(self)
-        window.title("Audio Model Comparison")
-        window.geometry("1100x520+60+60")
-        ttk.Label(window, text=f"Saved CSV: {self.model_comparison_csv.get()}").pack(anchor="w", padx=10, pady=(10, 4))
-
-        frame = ttk.Frame(window)
-        frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
-        base_columns = ["file_name", "id3_grouping_normalized", "tag_suggested_grouping"]
-        model_columns = [
-            field for field in fieldnames
-            if field.endswith("_grouping") or field.endswith("_confidence")
-            if field not in base_columns
-        ]
-        columns = [column for column in base_columns + model_columns if column in fieldnames]
-        tree = ttk.Treeview(frame, columns=columns, show="headings", height=16)
-        yscroll = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=tree.yview)
-        xscroll = ttk.Scrollbar(frame, orient=tk.HORIZONTAL, command=tree.xview)
-        tree.configure(yscrollcommand=yscroll.set, xscrollcommand=xscroll.set)
-        tree.grid(row=0, column=0, sticky="nsew")
-        yscroll.grid(row=0, column=1, sticky="ns")
-        xscroll.grid(row=1, column=0, sticky="ew")
-        frame.columnconfigure(0, weight=1)
-        frame.rowconfigure(0, weight=1)
-
-        for column in columns:
-            label = column.replace("_suggested_grouping", "").replace("_grouping", "").replace("_confidence", " conf")
-            tree.heading(column, text=label)
-            tree.column(column, width=220 if column == "file_name" else 145, stretch=column == "file_name")
-        for row in comparison_rows:
-            tree.insert("", tk.END, values=[row.get(column, "") for column in columns])
-
-    def _label_playlist_options_dialog(self):
-        dialog = tk.Toplevel(self)
-        dialog.title("Match Label Playlist")
-        dialog.geometry("760x430+80+80")
-        dialog.transient(self)
-        dialog.grab_set()
-        dialog.columnconfigure(0, weight=1)
-        dialog.rowconfigure(1, weight=1)
-
-        paths = []
-        result = {"options": None}
-        infer_label = "Infer from playlist name"
-        category_value = tk.StringVar(value=infer_label)
-        min_score_value = tk.StringVar(value=self.label_playlist_min_score.get() or "0.94")
-        output_value = tk.StringVar(value=self.label_playlist_output.get() or str(app_paths.DEFAULT_PLAYLIST_MATCHES_CSV))
-
-        intro = ttk.Label(
-            dialog,
-            text="Choose exported playlist files, then tell ClaveTagger what genre/category the playlist represents.",
-            padding=(10, 10, 10, 4),
-            wraplength=720,
-        )
-        intro.grid(row=0, column=0, sticky="ew")
-
-        list_frame = ttk.LabelFrame(dialog, text="Playlist files", padding=8)
-        list_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 8))
-        list_frame.columnconfigure(0, weight=1)
-        list_frame.rowconfigure(0, weight=1)
-        listbox = tk.Listbox(list_frame, selectmode=tk.EXTENDED, height=7)
-        listbox.grid(row=0, column=0, sticky="nsew")
-        list_scroll = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=listbox.yview)
-        list_scroll.grid(row=0, column=1, sticky="ns")
-        listbox.configure(yscrollcommand=list_scroll.set)
-
-        def refresh_paths():
-            listbox.delete(0, tk.END)
-            for path in paths:
-                listbox.insert(tk.END, path)
-
-        def add_files():
-            selected = filedialog.askopenfilenames(
-                parent=dialog,
-                title="Select exported playlist files",
-                filetypes=[
-                    ("Playlist files", "*.csv *.xml *.vdjfolder *.m3u *.m3u8"),
-                    ("CSV", "*.csv"),
-                    ("VirtualDJ XML", "*.xml *.vdjfolder"),
-                    ("M3U", "*.m3u *.m3u8"),
-                    ("All files", "*.*"),
-                ],
-            )
-            for path in selected:
-                if path not in paths:
-                    paths.append(path)
-            refresh_paths()
-
-        def remove_selected():
-            selected = set(listbox.curselection())
-            paths[:] = [path for index, path in enumerate(paths) if index not in selected]
-            refresh_paths()
-
-        file_buttons = ttk.Frame(list_frame)
-        file_buttons.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
-        self._button(file_buttons, "Add files", add_files, "Add one or more exported playlist files. Supported: CSV, XML/VDJ folder, M3U.").pack(side=tk.LEFT)
-        self._button(file_buttons, "Remove selected", remove_selected, "Remove selected playlist files from this match run.").pack(side=tk.LEFT, padx=6)
-
-        options_frame = ttk.LabelFrame(dialog, text="Match options", padding=8)
-        options_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 8))
-        options_frame.columnconfigure(1, weight=1)
-        self._label(
-            options_frame,
-            "Playlist category / genre:",
-            "Choose the category this playlist represents, for example Son Cubano. Infer uses the playlist file name, such as Son.",
-        ).grid(row=0, column=0, sticky="w")
-        category_combo = ttk.Combobox(
-            options_frame,
-            textvariable=category_value,
-            values=[infer_label] + self.category_names,
-            state="readonly",
-            width=28,
-        )
-        category_combo.grid(row=0, column=1, sticky="w", padx=8, pady=2)
-        self._label(options_frame, "Min score:", "Strict artist/title similarity threshold. 0.94 is conservative.").grid(row=1, column=0, sticky="w")
-        ttk.Entry(options_frame, textvariable=min_score_value, width=8).grid(row=1, column=1, sticky="w", padx=8, pady=2)
-        self._label(options_frame, "Output CSV:", "CSV report with every playlist row, local match, score, status, and target tag values.").grid(row=2, column=0, sticky="w")
-        output_row = ttk.Frame(options_frame)
-        output_row.grid(row=2, column=1, sticky="ew", padx=8, pady=2)
-        output_row.columnconfigure(0, weight=1)
-        ttk.Entry(output_row, textvariable=output_value).grid(row=0, column=0, sticky="ew")
-
-        def browse_output():
-            path = filedialog.asksaveasfilename(
-                parent=dialog,
-                defaultextension=".csv",
-                filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
-            )
-            if path:
-                output_value.set(path)
-
-        self._button(output_row, "Save as", browse_output, "Choose where to save the playlist match CSV.").grid(row=0, column=1, padx=(6, 0))
-
-        buttons = ttk.Frame(dialog, padding=(10, 0, 10, 10))
-        buttons.grid(row=3, column=0, sticky="ew")
-
-        def accept():
-            if not paths:
-                messagebox.showinfo("No playlist", "Choose at least one playlist file.", parent=dialog)
-                return
-            try:
-                min_score = float(min_score_value.get() or "0.94")
-            except ValueError:
-                messagebox.showerror("Invalid score", "Min score must be a number, for example 0.94.", parent=dialog)
-                return
-            category = "" if category_value.get() == infer_label else category_value.get()
-            self.label_playlist_output.set(output_value.get().strip())
-            self.label_playlist_min_score.set(str(min_score))
-            result["options"] = gui_services.LabelPlaylistOptions(
-                playlist_paths=list(paths),
-                explicit_category=category,
-                min_score=min_score,
-                output_csv=output_value.get().strip(),
-                config_path=self.config_path.get().strip(),
-            )
-            dialog.destroy()
-
-        self._button(buttons, "Match", accept, "Run matching against the currently loaded local tracks.").pack(side=tk.LEFT)
-        self._button(buttons, "Cancel", dialog.destroy, "Close without matching.").pack(side=tk.RIGHT)
-        dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
-        self.wait_window(dialog)
-        return result["options"]
-
-    def match_label_playlist(self):
-        options = self._label_playlist_options_dialog()
-        if not options:
-            return
-        if not self.rows and not self.source_paths and not self.input_csv.get().strip():
-            messagebox.showinfo("No local tracks", "Load local tracks first, or add source folders before matching a playlist.")
-            return
-
-        def worker():
-            try:
-                def phase(message):
-                    self.message_queue.put(("phase", message))
-
-                rows = self.rows
-                if not rows:
-                    phase("Playlist match: no loaded tracks yet, loading preview first...")
-                    rows = gui_services.preview_rows(
-                        self.source_paths,
-                        self.input_csv.get().strip(),
-                        self.config_path.get().strip(),
-                        progress_callback=lambda payload: self.message_queue.put(("load_progress", payload)),
-                    )
-                    self.rows = rows
-                    self.message_queue.put(("rows_loaded", rows))
-
-                match_rows, summary = gui_services.match_label_playlists(
-                    options,
-                    rows,
-                    status_callback=phase,
-                    progress_callback=lambda payload: self.message_queue.put(("playlist_match_progress", payload)),
-                )
-                self.rows = rows
-                self.message_queue.put(("playlist_match_result", (match_rows, summary)))
-                self.message_queue.put((
-                    "status",
-                    f"Playlist match complete: {summary['matched']} matched, {summary['review']} review, "
-                    f"{summary['unmatched']} unmatched. Prepared {summary['updated']} pending tag row(s).",
-                ))
-            except Exception as error:
-                app_logging.log_exception("playlist match failed", error)
-                self.message_queue.put(("error", str(error)))
-            finally:
-                self.message_queue.put(("done", None))
-
-        self._start_worker(worker)
-
-    def show_playlist_match_window(self, match_rows, summary):
-        window = tk.Toplevel(self)
-        window.title("Playlist Match Results")
-        window.geometry("1060x500+70+70")
-        ttk.Label(
-            window,
-            text=(
-                f"Saved CSV: {summary.get('output_csv', '')} | "
-                f"matched {summary.get('matched', 0)}, review {summary.get('review', 0)}, "
-                f"unmatched {summary.get('unmatched', 0)}, pending updates {summary.get('updated', 0)}"
-            ),
-            padding=(10, 10, 10, 4),
-        ).pack(anchor="w")
-
-        frame = ttk.Frame(window)
-        frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
-        columns = (
-            "match_status", "playlist_name", "playlist_category", "playlist_artist", "playlist_title",
-            "file_name", "artist", "title", "match_score", "target_grouping", "target_color",
-        )
-        headings = {
-            "match_status": "Status",
-            "playlist_name": "Playlist",
-            "playlist_category": "Category",
-            "playlist_artist": "Playlist Artist",
-            "playlist_title": "Playlist Title",
-            "file_name": "Matched File",
-            "artist": "Local Artist",
-            "title": "Local Title",
-            "match_score": "Score",
-            "target_grouping": "Target Grouping",
-            "target_color": "Target Color",
-        }
-        tree = ttk.Treeview(frame, columns=columns, show="headings", height=16)
-        yscroll = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=tree.yview)
-        xscroll = ttk.Scrollbar(frame, orient=tk.HORIZONTAL, command=tree.xview)
-        tree.configure(yscrollcommand=yscroll.set, xscrollcommand=xscroll.set)
-        tree.grid(row=0, column=0, sticky="nsew")
-        yscroll.grid(row=0, column=1, sticky="ns")
-        xscroll.grid(row=1, column=0, sticky="ew")
-        frame.columnconfigure(0, weight=1)
-        frame.rowconfigure(0, weight=1)
-        for column in columns:
-            tree.heading(column, text=headings[column])
-            tree.column(column, width=220 if column in {"playlist_title", "file_name"} else 125, stretch=column in {"playlist_title", "file_name"})
-        tree.tag_configure("matched", background="#dcf7df")
-        tree.tag_configure("review", background="#fff0bf")
-        tree.tag_configure("unmatched", background="#ffd6d6")
-        for row in match_rows:
-            status = row.get("match_status", "review")
-            tree.insert("", tk.END, values=[row.get(column, "") for column in columns], tags=(status,))
-
     def browse_classifier(self):
+        """Browse for classifier."""
         path = filedialog.askopenfilename(filetypes=[("Model files", "*.joblib *.pt"), ("All files", "*.*")])
         if path:
             self.classifier_path.set(path)
             self.classifier_backend.set(learning.detect_classifier_backend(path))
 
     def browse_classifier_input(self):
+        """Browse for classifier input."""
         path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
         if path:
             self.classifier_input.set(path)
 
     def browse_classifier_output(self):
+        """Browse for classifier output."""
         path = filedialog.asksaveasfilename(filetypes=[("Model files", "*.joblib *.pt"), ("All files", "*.*")])
         if path:
             self.classifier_output.set(path)
 
     def _append_log(self, message, write=False):
+        """Append log."""
         app_logging.log_info(message)
         target = self.write_log if write else self.log
         target.insert(tk.END, message + "\n")
         target.see(tk.END)
 
     def _set_busy(self, busy):
+        """Set busy."""
         self.config(cursor="")
         self.abort_button.configure(state="normal" if busy else "disabled")
         if busy and self.prevent_sleep.get() and not self.prevent_sleep_active:
@@ -1304,6 +1075,7 @@ class MusicCategoryGui(tk.Tk):
                 self._append_log("Windows sleep prevention released.")
 
     def _start_worker(self, target):
+        """Start worker."""
         if self.worker_thread and self.worker_thread.is_alive():
             messagebox.showinfo("Busy", "A task is already running.")
             return
@@ -1314,15 +1086,18 @@ class MusicCategoryGui(tk.Tk):
         self.worker_thread.start()
 
     def abort_current_task(self):
+        """Abort current task."""
         if self.cancel_token:
             self.cancel_token.cancel()
             self.status_label.configure(text="Cancelling after current step...")
             self._append_log("Cancellation requested.")
 
     def _optional_int(self, value):
+        """Optional int."""
         return int(value) if str(value).strip() else None
 
     def _report_options(self):
+        """Report options."""
         return gui_services.ReportOptions(
             source_paths=list(self.source_paths), input_csv=self.input_csv.get().strip(),
             output_csv=self.output_csv.get().strip(), details_csv=self.details_csv.get().strip(),
@@ -1340,6 +1115,7 @@ class MusicCategoryGui(tk.Tk):
         )
 
     def _train_options(self):
+        """Train options."""
         return gui_services.TrainOptions(
             source_paths=list(self.source_paths), input_csv=self.input_csv.get().strip(),
             details_csv=self.details_csv.get().strip(), config_path=self.config_path.get().strip(),
@@ -1355,6 +1131,7 @@ class MusicCategoryGui(tk.Tk):
         )
 
     def _write_options(self, grouping_column=None, color_column=None, apply_write=None):
+        """Write options."""
         return gui_services.WriteOptions(
             csv_path=self.write_csv.get().strip(), config_path=self.config_path.get().strip(),
             grouping_column=grouping_column if grouping_column is not None else self.grouping_column.get().strip(),
@@ -1363,6 +1140,7 @@ class MusicCategoryGui(tk.Tk):
         )
 
     def _choose_artifact_policy(self, action, options):
+        """Choose artifact policy."""
         found = gui_services.detect_existing_artifacts(action, options)
         if not found:
             return "resume"
@@ -1393,6 +1171,7 @@ class MusicCategoryGui(tk.Tk):
         buttons.pack(fill=tk.X, pady=(12, 0))
 
         def choose(value):
+            """Choose the requested value."""
             result.set(value)
             dialog.destroy()
 
@@ -1408,6 +1187,7 @@ class MusicCategoryGui(tk.Tk):
         return result.get() or None
 
     def preview_sources(self):
+        """Preview sources."""
         if not self.source_paths and not self.input_csv.get().strip():
             self.rows = []
             self._clear_table_state()
@@ -1415,6 +1195,7 @@ class MusicCategoryGui(tk.Tk):
             self.message_queue.put(("status", "Preview cleared. Add a folder or input CSV when ready."))
             return
         def worker():
+            """Worker."""
             try:
                 self.message_queue.put(("phase", "Preview: scanning folders and reading current tags..."))
                 rows = gui_services.preview_rows(
@@ -1434,9 +1215,12 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def estimate_report(self):
+        """Estimate report."""
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 _rows, status = gui_services.estimate_report(
                     self._report_options(),
@@ -1452,6 +1236,7 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def run_report(self):
+        """Run report."""
         current_table_rows = self._rows_in_table_order() if self.rows else []
         options = self._report_options()
         policy = self._choose_artifact_policy("analyze", options)
@@ -1460,8 +1245,10 @@ class MusicCategoryGui(tk.Tk):
         options.artifact_policy = policy
 
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
 
                 if current_table_rows:
@@ -1510,6 +1297,7 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def compare_audio_models(self):
+        """Compare audio models."""
         options = self._report_options()
         policy = self._choose_artifact_policy("compare", options)
         if policy is None:
@@ -1517,8 +1305,10 @@ class MusicCategoryGui(tk.Tk):
         options.artifact_policy = policy
 
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 phase("Compare models: scanning folders and reading current tags...")
                 rows = gui_services.preview_rows(
@@ -1549,6 +1339,7 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def train_classifier(self):
+        """Train classifier."""
         options = self._train_options()
         policy = self._choose_artifact_policy("train", options)
         if policy is None:
@@ -1556,10 +1347,13 @@ class MusicCategoryGui(tk.Tk):
         options.artifact_policy = policy
 
         def worker():
+            """Worker."""
             try:
                 def train_callback(payload):
+                    """Train callback."""
                     self.message_queue.put(("training_progress", payload))
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 rows = None
                 if options.training_source == "Current loaded tracks":
@@ -1608,9 +1402,12 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def evaluate_report(self):
+        """Evaluate report."""
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 options = gui_services.EvaluationOptions(list(self.source_paths), self.input_csv.get(), self.mode.get(), self.config_path.get(), self.prediction_column.get(), self.truth_column.get())
                 _rows, status = gui_services.evaluate_report(
@@ -1627,9 +1424,12 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def calibrate_report(self):
+        """Calibrate report."""
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 input_csv = self.input_csv.get().strip() or self.output_csv.get().strip()
                 options = gui_services.CalibrationOptions(input_csv, self.calibration_output.get().strip(), self.mismatch_output.get().strip(), self.truth_column.get().strip())
@@ -1643,9 +1443,12 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def run_write_tags(self):
+        """Run write tags."""
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, skipped = gui_services.run_write_tags(
                     self._write_options(),
@@ -1662,9 +1465,12 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def run_write_grouping_only(self):
+        """Run write grouping only."""
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, skipped = gui_services.run_write_tags(
                     self._write_options(grouping_column=self.value_column.get().strip(), color_column=""),
@@ -1681,6 +1487,7 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def _selected_row(self):
+        """Selected row."""
         selected = self.tree.selection()
         if not selected:
             return None
@@ -1691,13 +1498,16 @@ class MusicCategoryGui(tk.Tk):
         return None
 
     def _selected_rows(self):
+        """Selected rows."""
         selected = set(self.tree.selection())
         return [row for row in self.rows if row.get("file_path") in selected]
 
     def _rows_in_table_order(self):
+        """Rows in table order."""
         return list(self.rows)
 
     def on_row_selected(self, _event=None):
+        """On row selected."""
         row = self._selected_row()
         selected_count = len(self.tree.selection())
         self.selection_info.set(f"{selected_count} selected" if selected_count else "No tracks selected")
@@ -1709,6 +1519,7 @@ class MusicCategoryGui(tk.Tk):
         self.selected_note.set(row.get("manual_note", ""))
 
     def show_table_menu(self, event):
+        """Show table menu."""
         item = self.tree.identify_row(event.y)
         if item:
             self.tree.selection_set(item)
@@ -1718,6 +1529,7 @@ class MusicCategoryGui(tk.Tk):
         return "break"
 
     def _review_details_text(self, row):
+        """Review details text."""
         fields = [
             ("File", row.get("file_name", "")),
             ("Path", row.get("file_path", "")),
@@ -1731,8 +1543,8 @@ class MusicCategoryGui(tk.Tk):
             ("Tag Guess", f"{row.get('tag_suggested_grouping', '')} ({row.get('tag_confidence', '')})"),
             ("Tag Reason", row.get("tag_reason", "")),
             ("MAEST Guess", f"{row.get('model_audio_suggested_grouping', '')} ({row.get('model_audio_confidence', '')})"),
-            ("MAEST BPM", row.get("model_audio_bpm", "")),
             ("MAEST Top Labels", row.get("model_audio_top_labels", "")),
+            ("Audio Features", row.get("model_audio_features", "")),
             ("MAEST Reason", row.get("model_audio_reason", "")),
             ("Learned Guess", f"{row.get('learned_suggested_grouping', '')} ({row.get('learned_confidence', '')})"),
             ("Learned Reason", row.get("learned_reason", "")),
@@ -1743,6 +1555,7 @@ class MusicCategoryGui(tk.Tk):
         return "\n".join(f"{label}: {value}" for label, value in fields if value)
 
     def open_selected_review(self, _event=None):
+        """Open selected review."""
         if _event is not None and hasattr(_event, "y"):
             item = self.tree.identify_row(_event.y)
             if item:
@@ -1775,6 +1588,7 @@ class MusicCategoryGui(tk.Tk):
         details.configure(state="disabled")
 
         def refresh_review_details():
+            """Refresh review details."""
             current = self._selected_row()
             if not current:
                 return
@@ -1785,6 +1599,7 @@ class MusicCategoryGui(tk.Tk):
             details.configure(state="disabled")
 
         def move_review(offset):
+            """Move review."""
             if not self.filtered_row_indexes:
                 return
             selected = self.tree.selection()
@@ -1807,10 +1622,12 @@ class MusicCategoryGui(tk.Tk):
             refresh_review_details()
 
         def apply_and_refresh():
+            """Apply and refresh."""
             self.apply_correction()
             refresh_review_details()
 
         def apply_and_next():
+            """Apply and next."""
             self.apply_correction()
             move_review(1)
 
@@ -1846,24 +1663,27 @@ class MusicCategoryGui(tk.Tk):
         player = ttk.LabelFrame(edit_frame, text="Player", padding=8)
         player.grid(row=9, column=0, sticky="ew")
         self._play_pause_button(player).pack(side=tk.LEFT)
-        self._playback_button(player, "■", self.stop_playback).pack(side=tk.LEFT)
-        self._playback_button(player, "↗", self.open_selected_external).pack(side=tk.LEFT, padx=4)
+        self._playback_button(player, "Stop", self.stop_playback).pack(side=tk.LEFT)
+        self._playback_button(player, "Open", self.open_selected_external).pack(side=tk.LEFT, padx=4)
         seek = ttk.Scale(player, from_=0, to=300, variable=self.playback_seek, orient=tk.HORIZONTAL)
         seek.pack(fill=tk.X, expand=True, padx=4)
         self._bind_seek_control(seek)
         ttk.Label(edit_frame, textvariable=self.playback_time).grid(row=10, column=0, sticky="w", pady=(6, 0))
 
     def on_bulk_grouping_selected(self, _event=None):
+        """On bulk grouping selected."""
         grouping = self.bulk_target_grouping.get().strip()
         if grouping:
             self.bulk_target_color.set(config.category_to_color(grouping))
 
     def on_target_grouping_selected(self, _event=None):
+        """On target grouping selected."""
         grouping = self.selected_target_grouping.get().strip()
         if grouping:
             self.selected_target_color.set(config.category_to_color(grouping))
 
     def apply_correction(self):
+        """Apply correction."""
         row = self._selected_row()
         if not row:
             messagebox.showinfo("No track", "Select a track first.")
@@ -1881,6 +1701,7 @@ class MusicCategoryGui(tk.Tk):
         self._append_log(f"Manual correction saved for {row.get('file_name', '')}.")
 
     def apply_bulk_correction(self):
+        """Apply bulk correction."""
         selected_rows = self._selected_rows()
         if not selected_rows:
             messagebox.showinfo("No tracks", "Select one or more tracks in the table first.")
@@ -1907,12 +1728,14 @@ class MusicCategoryGui(tk.Tk):
         self._append_log(f"Bulk correction saved for {updated} tracks.")
 
     def save_current_csv(self):
+        """Save current csv."""
         if not self.rows:
             return
         core.write_csv(self.output_csv.get(), self.rows, core.MAIN_FIELDNAMES)
         self._append_log(f"Saved {self.output_csv.get()}.")
 
     def _write_candidate_grouping(self, row):
+        """Write candidate grouping."""
         target = (row.get("target_grouping") or "").strip()
         if target:
             return target
@@ -1925,12 +1748,14 @@ class MusicCategoryGui(tk.Tk):
         return ""
 
     def _write_candidate_color(self, row, grouping):
+        """Write candidate color."""
         target = (row.get("target_color") or "").strip()
         if target:
             return target
         return config.category_to_color(grouping) if grouping else ""
 
     def _row_has_pending_tag_write(self, row):
+        """Row has pending tag write."""
         grouping = self._write_candidate_grouping(row)
         if not grouping:
             return False
@@ -1944,6 +1769,7 @@ class MusicCategoryGui(tk.Tk):
         return bool(color and row.get("id3_color", "") != color)
 
     def _rebuild_pending_tag_paths(self, rows=None):
+        """Rebuild pending tag paths."""
         rows = self.rows if rows is None else rows
         self.pending_tag_paths = {
             row.get("file_path", "")
@@ -1953,6 +1779,7 @@ class MusicCategoryGui(tk.Tk):
         self._update_pending_title()
 
     def _update_pending_path(self, row):
+        """Update pending path."""
         file_path = row.get("file_path", "")
         if not file_path:
             return
@@ -1963,6 +1790,7 @@ class MusicCategoryGui(tk.Tk):
         self._update_pending_title()
 
     def _pending_tag_rows(self):
+        """Pending tag rows."""
         return [
             row
             for row in self.rows
@@ -1970,6 +1798,7 @@ class MusicCategoryGui(tk.Tk):
         ]
 
     def _prepared_pending_tag_rows(self):
+        """Prepared pending tag rows."""
         prepared = []
         for row in self._pending_tag_rows():
             grouping = self._write_candidate_grouping(row)
@@ -1980,18 +1809,22 @@ class MusicCategoryGui(tk.Tk):
         return prepared
 
     def _update_pending_title(self):
+        """Update pending title."""
         count = len(self.pending_tag_paths)
         self.pending_tags_status.set(f"Pending tags: {count}")
         suffix = f" - {count} pending tag{'s' if count != 1 else ''}" if count else ""
         self.title(f"{'* ' if count else ''}{app_paths.APP_NAME}{suffix}")
 
     def _changed_paths_from_changes(self, changes):
+        """Changed paths from changes."""
         return {file_path for file_path, _row_changes in changes if file_path}
 
     def _read_metadata_for_paths(self, paths):
+        """Read metadata for paths."""
         return {path: id3_tags.read_id3(path) for path in paths if path}
 
     def write_pending_tags(self, apply_write):
+        """Write pending tags."""
         pending_rows = self._prepared_pending_tag_rows()
         if not pending_rows:
             messagebox.showinfo("No pending tags", "There are no pending tag writes.")
@@ -2000,8 +1833,10 @@ class MusicCategoryGui(tk.Tk):
             return
 
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, _skipped = gui_services.run_write_rows(
                     pending_rows,
@@ -2026,14 +1861,17 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def write_selected_tags(self, apply_write):
+        """Write selected tags."""
         row = self._selected_row()
         if not row:
             return
         selected_path = row.get("file_path", "")
 
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, _skipped = gui_services.run_write_rows(
                     [dict(row)],
@@ -2058,6 +1896,7 @@ class MusicCategoryGui(tk.Tk):
         self._start_worker(worker)
 
     def clear_selected_tags(self, apply_write):
+        """Clear selected tags."""
         selected_rows = self._selected_rows()
         if not selected_rows:
             messagebox.showinfo("No tracks", "Select one or more tracks first.")
@@ -2068,8 +1907,10 @@ class MusicCategoryGui(tk.Tk):
         rows_to_clear = [dict(row) for row in selected_rows]
 
         def worker():
+            """Worker."""
             try:
                 def phase(message):
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, _skipped = gui_services.run_clear_rows(
                     rows_to_clear,
@@ -2092,395 +1933,8 @@ class MusicCategoryGui(tk.Tk):
 
         self._start_worker(worker)
 
-    def _load_pygame(self):
-        import warnings
-
-        os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            import pygame
-        return pygame
-
-    def _track_duration(self, file_path):
-        try:
-            from mutagen.mp3 import MP3
-
-            return float(MP3(file_path).info.length)
-        except Exception:
-            return 0.0
-
-    def _load_track_into_mixer(self, pygame, file_path):
-        if self.playback_buffer_path != file_path or self.playback_buffer is None:
-            with open(file_path, "rb") as handle:
-                self.playback_buffer = io.BytesIO(handle.read())
-            self.playback_buffer_path = file_path
-        self.playback_buffer.seek(0)
-        try:
-            pygame.mixer.music.load(self.playback_buffer, namehint=Path(file_path).suffix.lstrip(".") or "mp3")
-            self._append_log(f"Loaded into memory: {Path(file_path).name}.")
-        except TypeError:
-            pygame.mixer.music.load(self.playback_buffer)
-            self._append_log(f"Loaded into memory: {Path(file_path).name}.")
-        except Exception as error:
-            app_logging.log_exception("memory playback load failed", error)
-            self.playback_buffer = None
-            self.playback_buffer_path = ""
-            pygame.mixer.music.load(file_path)
-            self._append_log(f"Memory playback load failed, streaming from file: {Path(file_path).name}.")
-
-    def _format_time(self, seconds):
-        seconds = max(0, int(seconds or 0))
-        return f"{seconds // 60:02d}:{seconds % 60:02d}"
-
-    def _update_playback_progress(self):
-        if not self.playing_file:
-            return
-        try:
-            pygame = self._load_pygame()
-            position = self.playback_offset + max(0.0, pygame.mixer.music.get_pos() / 1000.0)
-            if self.playback_duration:
-                position = min(position, self.playback_duration)
-                self.playback_seek.set(position)
-            self.playback_time.set(f"{self._format_time(position)} / {self._format_time(self.playback_duration)}")
-            if pygame.mixer.music.get_busy():
-                self.after(500, self._update_playback_progress)
-            elif not self.playback_paused:
-                self.playing_file = ""
-                self._update_play_pause_buttons()
-        except Exception:
-            pass
-
-    def _seek_value_from_pointer(self, event):
-        width = max(1, event.widget.winfo_width())
-        ratio = min(1.0, max(0.0, event.x / width))
-        maximum = float(self.playback_duration or event.widget.cget("to") or 0.0)
-        return ratio * maximum
-
-    def _preview_seek_from_pointer(self, event):
-        target = self._seek_value_from_pointer(event)
-        self.playback_seek.set(target)
-        self.playback_time.set(f"{self._format_time(target)} / {self._format_time(self.playback_duration)}")
-        return "break"
-
-    def _seek_from_pointer(self, event):
-        target = self._seek_value_from_pointer(event)
-        self.playback_seek.set(target)
-        self.playback_time.set(f"{self._format_time(target)} / {self._format_time(self.playback_duration)}")
-        if self.playing_file:
-            self.seek_playback()
-        return "break"
-
-    def play_selected(self):
-        row = self._selected_row()
-        if not row:
-            messagebox.showinfo("No track", "Select a track in the table first.")
-            return
-        try:
-            pygame = self._load_pygame()
-            pygame.mixer.init()
-            self._load_track_into_mixer(pygame, row["file_path"])
-            pygame.mixer.music.play()
-            self.playing_file = row["file_path"]
-            self.playback_paused = False
-            self.playback_duration = self._track_duration(row["file_path"])
-            self.playback_offset = 0.0
-            self._set_seek_range(self.playback_duration)
-            if self.playback_duration:
-                self.playback_seek.set(0)
-            self.playback_time.set(f"00:00 / {self._format_time(self.playback_duration)}")
-            self._update_play_pause_buttons()
-            self._update_playback_progress()
-            self._append_log(f"Playing {row.get('file_name', '')}.")
-        except ModuleNotFoundError:
-            self._append_log("pygame is not installed; opening the selected track externally.")
-            self.open_selected_external()
-        except Exception as error:
-            app_logging.log_exception("playback failed", error)
-            self._append_log(f"Playback failed: {error}; opening externally.")
-            self.open_selected_external()
-
-    def toggle_play_pause(self):
-        row = self._selected_row()
-        selected_file = row.get("file_path") if row else ""
-        try:
-            pygame = self._load_pygame()
-            if not self.playing_file:
-                self.play_selected()
-                return
-            if selected_file and selected_file != self.playing_file:
-                self.play_selected()
-                return
-            if self.playback_paused:
-                pygame.mixer.music.unpause()
-                self.playback_paused = False
-                self._update_play_pause_buttons()
-                self._update_playback_progress()
-            else:
-                pygame.mixer.music.pause()
-                self.playback_paused = True
-                self._update_play_pause_buttons()
-        except Exception:
-            pass
-
-    def pause_playback(self):
-        self.toggle_play_pause()
-
-    def stop_playback(self):
-        try:
-            pygame = self._load_pygame()
-            pygame.mixer.music.stop()
-            self.playing_file = ""
-            self.playback_paused = False
-            self.playback_offset = 0.0
-            self.playback_seek.set(0)
-            self.playback_time.set(f"00:00 / {self._format_time(self.playback_duration)}")
-            self._update_play_pause_buttons()
-        except Exception:
-            pass
-
-    def seek_playback(self, _event=None):
-        if not self.playing_file:
-            return
-        try:
-            pygame = self._load_pygame()
-            self.playback_offset = float(self.playback_seek.get())
-            pygame.mixer.music.play(start=self.playback_offset)
-            self.playback_paused = False
-            self._update_play_pause_buttons()
-            self._update_playback_progress()
-        except Exception:
-            pass
-
-    def open_selected_external(self):
-        row = self._selected_row()
-        if row and row.get("file_path"):
-            os.startfile(row["file_path"])
-        else:
-            messagebox.showinfo("No track", "Select a track in the table first.")
-
-    def _insert_or_update_row(self, row, status=None):
-        file_path = row.get("file_path", "")
-        tag = self._row_display_tag(row, status)
-        if file_path in self.row_by_path:
-            if self._row_matches_table_filter(row):
-                self.tree.item(file_path, values=self._row_values(row), tags=(tag,))
-            else:
-                self.tree.delete(file_path)
-                self.row_by_path.pop(file_path, None)
-        self._update_pending_title()
-
-    def _row_values(self, row):
-        return (
-            row.get("file_name", ""), row.get("id3_grouping_normalized", ""), row.get("id3_color", ""),
-            row.get("tag_suggested_grouping", ""), row.get("model_audio_suggested_grouping", ""),
-            row.get("learned_suggested_grouping", ""), row.get("recommended_grouping", ""),
-            row.get("target_grouping", ""), row.get("target_color", ""),
-            row.get("recommended_source", ""), row.get("recommended_confidence", ""), row.get("model_audio_bpm", ""),
-        )
-
-    def _row_display_tag(self, row, status=None):
-        tag = status or row.get("_gui_status", "queued")
-        if row.get("_analysis_skipped_existing_grouping"):
-            tag = "done"
-        elif tag not in {"queued", "current"} and row.get("recommended_grouping") == "Needs review":
-            tag = "needs_review"
-        row["_gui_status"] = tag
-        return tag
-
-    def _row_matches_table_filter(self, row):
-        if row.get("_gui_status") == "current":
-            return True
-        filter_name = self.table_filter.get()
-        has_grouping = gui_services.has_existing_grouping(row)
-        if filter_name == "Missing Grouping":
-            return not has_grouping
-        if filter_name == "Tagged":
-            return has_grouping
-        if filter_name == "Pending tags":
-            return row.get("file_path", "") in self.pending_tag_paths
-        if filter_name == "Needs review":
-            return row.get("_gui_status") == "needs_review" or row.get("recommended_grouping") == "Needs review"
-        return True
-
-    def refresh_table_filter(self):
-        self._refresh_filtered_rows(keep_start=False)
-        self._render_virtual_table()
-
-    def toggle_table_sort(self, column):
-        self.sort_column, self.sort_direction = virtual_table.next_sort_state(
-            self.sort_column,
-            self.sort_direction,
-            column,
-        )
-        self._update_sort_headings()
-        self._refresh_filtered_rows(keep_start=False)
-        self._render_virtual_table()
-
-    def _reset_table_sort(self):
-        self.sort_column = ""
-        self.sort_direction = "none"
-        self._update_sort_headings()
-
-    def _update_sort_headings(self):
-        if not getattr(self, "tree", None):
-            return
-        for column, label in self.column_headings.items():
-            suffix = ""
-            if column == self.sort_column:
-                suffix = " ↑" if self.sort_direction == "asc" else (" ↓" if self.sort_direction == "desc" else "")
-            self.tree.heading(column, text=f"{label}{suffix}", command=lambda selected=column: self.toggle_table_sort(selected))
-
-    def _refresh_filtered_rows(self, keep_start=True):
-        indexes = virtual_table.matching_indexes(self.rows, self._row_matches_table_filter)
-        self.filtered_row_indexes = virtual_table.sorted_indexes(
-            self.rows,
-            indexes,
-            self.sort_column,
-            self.sort_direction,
-            numeric_columns={"model_audio_bpm"},
-        )
-        if not keep_start:
-            self.virtual_table_start = 0
-        self.virtual_table_start = virtual_table.clamp_start(
-            self.virtual_table_start,
-            len(self.filtered_row_indexes),
-            self.virtual_table_window,
-        )
-
-    def _render_virtual_table(self, start=None, preserve_selection=True):
-        if start is not None:
-            self.virtual_table_start = start
-        self.virtual_table_start, end, indexes = virtual_table.visible_slice(
-            self.filtered_row_indexes,
-            self.virtual_table_start,
-            self.virtual_table_window,
-        )
-        selected = set(self.tree.selection()) if preserve_selection else set()
-        self._reset_table(update_status=False)
-        for row_index in indexes:
-            row = self.rows[row_index]
-            file_path = row.get("file_path", "")
-            if not file_path:
-                continue
-            self.tree.insert("", tk.END, iid=file_path, values=self._row_values(row), tags=(self._row_display_tag(row),))
-            self.row_by_path[file_path] = file_path
-        rendered_selection = [item for item in selected if item in self.row_by_path]
-        if rendered_selection:
-            self.tree.selection_set(rendered_selection)
-        self._update_virtual_scrollbar()
-        self._update_table_status(end)
-
-    def _update_virtual_scrollbar(self):
-        if not self.virtual_yscroll:
-            return
-        first, last = virtual_table.scrollbar_fractions(
-            self.virtual_table_start,
-            len(self.filtered_row_indexes),
-            self.virtual_table_window,
-        )
-        self.virtual_yscroll.set(first, last)
-
-    def _update_table_status(self, end=None):
-        filtered = len(self.filtered_row_indexes)
-        if not filtered:
-            self.selection_info.set(f"0/{len(self.rows)} visible")
-            return
-        end = self.virtual_table_start + len(self.tree.get_children("")) if end is None else end
-        sort_note = ""
-        if self.sort_column and self.sort_direction != "none":
-            sort_note = f" | sorted by {self.column_headings.get(self.sort_column, self.sort_column)} {self.sort_direction}"
-        self.selection_info.set(
-            f"visible {self.virtual_table_start + 1}-{min(end, filtered)} / filtered {filtered} / total {len(self.rows)}{sort_note}"
-        )
-
-    def _virtual_page_size(self):
-        try:
-            return max(1, int(self.tree["height"]))
-        except Exception:
-            return 8
-
-    def _set_virtual_table_start(self, start):
-        self._render_virtual_table(start=start)
-        return "break"
-
-    def _scroll_virtual_table(self, delta):
-        self._render_virtual_table(start=self.virtual_table_start + int(delta))
-        return "break"
-
-    def _on_virtual_mousewheel(self, event):
-        step = -1 if event.delta > 0 else 1
-        units = max(1, abs(event.delta) // 120) * 3
-        return self._scroll_virtual_table(step * units)
-
-    def _virtual_yview(self, *args):
-        if not args:
-            return
-        if args[0] == "moveto":
-            fraction = float(args[1])
-            target = int(fraction * max(1, len(self.filtered_row_indexes)))
-            self._render_virtual_table(start=target)
-        elif args[0] == "scroll":
-            amount = int(args[1])
-            unit = self._virtual_page_size() if args[2] == "pages" else 3
-            self._scroll_virtual_table(amount * unit)
-
-    def _completed_status_for_row(self, row):
-        if row.get("_analysis_skipped_existing_grouping"):
-            return "done"
-        if row.get("recommended_grouping") == "Needs review":
-            return "needs_review"
-        if row.get("recommended_confidence") in {"", "review", "low"}:
-            return "needs_review"
-        current_grouping = row.get("id3_grouping_normalized", "")
-        recommended = row.get("recommended_grouping", "")
-        if row.get("recommended_confidence") == "high" or (current_grouping and current_grouping == recommended):
-            return "done"
-        return "completed"
-
-    def _mark_current(self, row, after_status=None):
-        file_path = row.get("file_path", "")
-        for existing in self.rows:
-            if existing.get("_gui_status") == "current":
-                existing["_gui_status"] = existing.get("_previous_gui_status", "queued")
-                existing.pop("_previous_gui_status", None)
-                self._insert_or_update_row(existing)
-        row["_previous_gui_status"] = after_status or row.get("_gui_status", "queued")
-        row["_gui_status"] = "current"
-        self._scroll_row_into_view(row)
-        self._insert_or_update_row(row, status="current")
-        if file_path in self.row_by_path:
-            self.tree.see(file_path)
-
-    def _scroll_row_into_view(self, row):
-        try:
-            row_index = self.rows.index(row)
-        except ValueError:
-            return
-        self._refresh_filtered_rows(keep_start=True)
-        self.virtual_table_start = virtual_table.start_for_row_index(
-            self.filtered_row_indexes,
-            row_index,
-            self.virtual_table_start,
-            self.virtual_table_window,
-        )
-        self._render_virtual_table()
-
-    def _reset_table(self, update_status=True):
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        self.row_by_path = {}
-        if update_status:
-            self._update_pending_title()
-
-    def _clear_table_state(self):
-        self.pending_tag_paths = set()
-        self.filtered_row_indexes = []
-        self.virtual_table_start = 0
-        self._reset_table()
-        self._update_virtual_scrollbar()
-        self._update_table_status()
-
     def _poll_queue(self):
+        """Poll queue."""
         processed_messages = 0
         deadline = time.monotonic() + 0.035
         try:

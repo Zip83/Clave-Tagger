@@ -39,7 +39,6 @@
       "color": "#FF6DFF",
       "tag_patterns": ["bachata", "romeo santos", "aventura", "prince royce", "alex bueno", "frank reyes", "antony santos", "elvis martinez", "jay d amante", "raulin rodriguez", "teodoro reyes", "toby love"],
       "model_labels": [],
-      "bpm_boosts": [{"min": 118, "max": 145, "weight": 0.006}],
       "model_weight": 1.0,
       "model_low_confidence": true
     },
@@ -50,7 +49,6 @@
       "aliases": ["#ChaChaCha", "ChaChaCha", "Cha cha"],
       "tag_patterns": ["cha cha cha", "chachacha", "cha cha", "orquesta america", "direct latin influence"],
       "model_labels": ["Latin---Cha-Cha"],
-      "bpm_boosts": [{"min": 118, "max": 145, "weight": 0.004}],
       "model_weight": 1.0
     },
     {
@@ -76,7 +74,6 @@
       "color": "#FFB6FF",
       "tag_patterns": ["kizomba", "urban kiz", "semba", "nelson freitas", "dj kadu", "dj paparazzi", "kaysha", "stony", "haylton dias", "richard birman"],
       "model_labels": [],
-      "bpm_boosts": [{"min": 85, "max": 112, "weight": 0.004}],
       "model_weight": 1.0,
       "model_low_confidence": true
     },
@@ -95,7 +92,6 @@
       "color": "#DF00DF",
       "tag_patterns": ["reggaeton", "regueton", "daddy yankee", "don omar"],
       "model_labels": ["Latin---Reggaeton", {"label": "Reggae---Dancehall", "weight": 0.7}],
-      "bpm_boosts": [{"min": 85, "max": 112, "weight": 0.004}],
       "model_weight": 1.0
     },
     {
@@ -106,7 +102,6 @@
       "tag_patterns": ["salsa dura", "salsa", "mambo", "descarga", "fania", "hector lavoe", "willie colon", "ray barretto", "el gran combo", "oscar d leon", "ismael miranda", "la 33", "cuco valoy", "fruko"],
       "weak_tag_patterns": ["salsa"],
       "model_labels": ["Latin---Salsa", "Latin---Mambo", "Latin---Descarga", "Latin---Charanga", "Latin---Pachanga"],
-      "bpm_boosts": [{"min": 145, "max": 190, "weight": 0.004}],
       "model_weight": 1.0
     },
     {
@@ -154,7 +149,6 @@
       "color": "#49FF49",
       "tag_patterns": ["timba", "charanga habanera", "van van", "manolito", "maykel blanco", "alexander abreu", "havana d primera", "miguel enriquez", "n taya"],
       "model_labels": ["Latin---Salsa", "Latin---Cubano", "Latin---Mambo", "Latin---Charanga", "Latin---Afro-Cuban"],
-      "bpm_boosts": [{"min": 145, "max": 190, "weight": 0.003}],
       "model_weight": 1.0,
       "model_low_confidence": true
     },

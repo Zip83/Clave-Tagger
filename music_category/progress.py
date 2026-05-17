@@ -3,6 +3,7 @@ from pathlib import Path
 
 
 def load_progress(path):
+    """Load progress."""
     progress_path = Path(path)
     if not progress_path.exists():
         return {}
@@ -10,10 +11,12 @@ def load_progress(path):
 
 
 def save_progress(path, progress):
+    """Save progress."""
     Path(path).write_text(json.dumps(progress, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def format_duration(seconds):
+    """Format duration."""
     seconds = int(round(seconds))
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)

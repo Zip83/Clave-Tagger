@@ -6,6 +6,7 @@ from .schemas import DETAIL_FIELDNAMES, MAIN_FIELDNAMES, MODES_THAT_USE_TAGS, em
 
 
 def iter_mp3_files(source_paths):
+    """Iter mp3 files."""
     for source_path in source_paths:
         source = Path(source_path)
         for file_path in sorted(source.rglob("*.mp3")):
@@ -13,6 +14,7 @@ def iter_mp3_files(source_paths):
 
 
 def read_rows_from_sources(source_paths, mode, progress_callback=None):
+    """Read rows from sources."""
     rows = []
     files = list(iter_mp3_files(source_paths))
     total = len(files)
@@ -54,6 +56,7 @@ def read_rows_from_sources(source_paths, mode, progress_callback=None):
 
 
 def read_rows_from_csv(path, progress_callback=None):
+    """Read rows from csv."""
     with Path(path).open("r", encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
     total = len(rows)
@@ -101,6 +104,7 @@ def read_rows_from_csv(path, progress_callback=None):
 
 
 def load_extra_classifier_input(rows, classifier_input):
+    """Load extra classifier input."""
     if not classifier_input:
         return
     extra_rows = read_rows_from_csv(classifier_input)
@@ -115,6 +119,7 @@ def load_extra_classifier_input(rows, classifier_input):
 
 
 def write_csv(path, rows, fieldnames):
+    """Write csv."""
     with Path(path).open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()

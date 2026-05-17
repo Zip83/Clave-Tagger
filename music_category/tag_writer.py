@@ -2,6 +2,7 @@ from . import config, csv_io, id3_tags
 
 
 def plan_tag_changes(rows, grouping_column=None, color_column=None, only_when_empty=False, progress_callback=None):
+    """Plan tag changes."""
     changes = []
     skipped = []
     total = len(rows)
@@ -67,6 +68,7 @@ def plan_tag_changes(rows, grouping_column=None, color_column=None, only_when_em
 
 
 def plan_clear_tag_changes(rows, clear_grouping=True, clear_color=True, progress_callback=None):
+    """Plan clear tag changes."""
     changes = []
     skipped = []
     total = len(rows)
@@ -111,6 +113,7 @@ def plan_clear_tag_changes(rows, clear_grouping=True, clear_color=True, progress
 
 
 def apply_tag_changes(changes, apply_changes=False, log=print, progress_callback=None):
+    """Apply tag changes."""
     total = len(changes)
     if progress_callback:
         progress_callback(
@@ -156,6 +159,7 @@ def apply_tag_changes(changes, apply_changes=False, log=print, progress_callback
 
 
 def write_tags_from_csv(csv_path, grouping_column=None, color_column=None, apply_changes=False, only_when_empty=False):
+    """Write tags from csv."""
     rows = csv_io.read_rows_from_csv(csv_path)
     changes, skipped = plan_tag_changes(rows, grouping_column, color_column, only_when_empty)
     apply_tag_changes(changes, apply_changes=apply_changes)
@@ -166,4 +170,5 @@ def write_tags_from_csv(csv_path, grouping_column=None, color_column=None, apply
 
 
 def write_grouping_from_csv(csv_path, value_column, apply_changes=False, only_when_empty=False):
+    """Write grouping from csv."""
     write_tags_from_csv(csv_path=csv_path, grouping_column=value_column, color_column=None, apply_changes=apply_changes, only_when_empty=only_when_empty)

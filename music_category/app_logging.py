@@ -6,6 +6,7 @@ from .app_paths import DEFAULT_LOG_FILE, ensure_runtime_dirs
 
 
 def configure_logging(log_file=DEFAULT_LOG_FILE):
+    """Configure logging."""
     ensure_runtime_dirs()
     log_path = Path(log_file)
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -20,10 +21,12 @@ def configure_logging(log_file=DEFAULT_LOG_FILE):
 
 
 def log_info(message):
+    """Log info."""
     configure_logging()
     logging.getLogger("clavetagger").info(message)
 
 
 def log_exception(message, error):
+    """Log exception."""
     configure_logging()
     logging.getLogger("clavetagger").error("%s: %s\n%s", message, error, traceback.format_exc())

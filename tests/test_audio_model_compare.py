@@ -31,9 +31,9 @@ class AudioModelCompareTests(unittest.TestCase):
             return {
                 "model_audio_suggested_grouping": "Merengue" if model_id == "a/model" else "Salsa (Dura)",
                 "model_audio_confidence": "high",
-                "model_audio_bpm": "144.0",
                 "model_audio_top_labels": model_id,
                 "model_audio_category_scores": "",
+                "model_audio_features": "",
                 "model_audio_reason": f"model={model_id}",
             }
 
@@ -52,6 +52,7 @@ class AudioModelCompareTests(unittest.TestCase):
             self.assertTrue(output.exists())
 
         self.assertIn("m2_model_a_grouping", fields)
+        self.assertNotIn("m2_model_a_bpm", fields)
         self.assertEqual(comparison_rows[0]["m2_model_a_grouping"], "Merengue")
         self.assertEqual(comparison_rows[0]["m3_model_b_grouping"], "Salsa (Dura)")
 

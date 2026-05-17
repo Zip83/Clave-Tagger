@@ -13,6 +13,7 @@ MERGE_REPORT_FIELDS = artifacts.MERGE_REPORT_FIELDS
 
 @dataclass
 class ReportOptions:
+    """ReportOptions."""
     source_paths: list
     input_csv: str
     output_csv: str
@@ -45,6 +46,7 @@ class ReportOptions:
 
 @dataclass
 class TrainOptions:
+    """TrainOptions."""
     source_paths: list
     input_csv: str
     details_csv: str
@@ -71,31 +73,38 @@ class TrainOptions:
 
 
 def _path_if_exists(path):
+    """Path if exists."""
     return artifacts.path_if_exists(path)
 
 
 def detect_existing_artifacts(action, options):
+    """Detect existing artifacts."""
     return artifacts.detect_existing_artifacts(action, options)
 
 
 def backup_artifacts(paths, backup_root="backups", timestamp=None):
+    """Backup artifacts."""
     return artifacts.backup_artifacts(paths, backup_root, timestamp)
 
 
 def _read_plain_csv(path):
+    """Read plain csv."""
     return artifacts.read_plain_csv(path)
 
 
 def merge_report_artifacts(rows, main_csv="", details_csv=""):
+    """Merge report artifacts."""
     return artifacts.merge_report_artifacts(rows, main_csv, details_csv)
 
 
 def prepare_artifacts(action, options, status_callback=None):
+    """Prepare artifacts."""
     return artifacts.prepare_artifacts(action, options, status_callback)
 
 
 @dataclass
 class WriteOptions:
+    """WriteOptions."""
     csv_path: str
     config_path: str
     grouping_column: str
@@ -106,6 +115,7 @@ class WriteOptions:
 
 @dataclass
 class EvaluationOptions:
+    """EvaluationOptions."""
     source_paths: list
     input_csv: str
     mode: str
@@ -116,6 +126,7 @@ class EvaluationOptions:
 
 @dataclass
 class CalibrationOptions:
+    """CalibrationOptions."""
     input_csv: str
     output_config: str
     mismatch_output: str
@@ -124,6 +135,7 @@ class CalibrationOptions:
 
 @dataclass
 class LabelPlaylistOptions:
+    """LabelPlaylistOptions."""
     playlist_paths: list
     explicit_category: str
     min_score: float
@@ -132,16 +144,19 @@ class LabelPlaylistOptions:
 
 
 def default_classifier_output_for_backend(backend):
+    """Default classifier output for backend."""
     if backend == "heavy":
         return str(app_paths.DEFAULT_HEAVY_CLASSIFIER)
     return str(app_paths.DEFAULT_LIGHT_CLASSIFIER)
 
 
 def sync_classifier_paths_for_backend(backend, classifier_path, classifier_output):
+    """Synchronize classifier paths for backend."""
     if backend == "auto":
         return classifier_path, classifier_output
 
     def is_default_path(path):
+        """Is default path."""
         normalized = (path or "").replace("\\", "/")
         return normalized in {
             "",
@@ -156,6 +171,7 @@ def sync_classifier_paths_for_backend(backend, classifier_path, classifier_outpu
 
 
 def dependency_state(mode, classifier_backend, use_details=True, write_after_report=False):
+    """Dependency state."""
     uses_audio_model = mode in {"model", "both", "all"}
     uses_learned = mode in {"learned", "all"}
     is_heavy = classifier_backend == "heavy"
@@ -173,6 +189,7 @@ def dependency_state(mode, classifier_backend, use_details=True, write_after_rep
 
 
 def load_rows(source_paths, input_csv, mode, config_path, progress_callback=None):
+    """Load rows."""
     core.load_category_config(config_path)
     if source_paths:
         return core.read_rows_from_sources(source_paths, mode, progress_callback=progress_callback)
@@ -182,15 +199,18 @@ def load_rows(source_paths, input_csv, mode, config_path, progress_callback=None
 
 
 def rows_without_source_folders(rows, removed_source_paths):
+    """Rows without source folders."""
     removed = {str(Path(path)) for path in removed_source_paths}
     return [row for row in rows if str(Path(row.get("source_folder", ""))) not in removed]
 
 
 def preview_rows(source_paths, input_csv, config_path, progress_callback=None):
+    """Preview rows."""
     return load_rows(source_paths, input_csv, "tags", config_path, progress_callback=progress_callback)
 
 
 def estimate_report(options, status_callback=None, progress_callback=None):
+    """Estimate report."""
     if status_callback:
         status_callback("Estimate: loading track metadata...")
     rows = load_rows(options.source_paths, options.input_csv, options.mode, options.config_path, progress_callback=progress_callback)
@@ -207,19 +227,24 @@ def estimate_report(options, status_callback=None, progress_callback=None):
 
 
 def refresh_recommendations(rows, mode, priority):
+    """Refresh recommendations."""
     core.apply_recommendations(rows, mode, priority)
 
 
 def has_existing_grouping(row):
+    """Has existing grouping."""
     return bool(str(row.get("id3_grouping_normalized") or row.get("id3_grouping") or "").strip())
 
 
 def rows_missing_grouping(rows):
+    """Rows missing grouping."""
     return [row for row in rows if not has_existing_grouping(row)]
 
 
 def run_report(options, model_progress_callback=None, learned_progress_callback=None, rows=None, status_callback=None):
+    """Run report."""
     def report_status(message):
+        """Report status."""
         if status_callback:
             status_callback(message)
 
@@ -295,6 +320,7 @@ def run_report(options, model_progress_callback=None, learned_progress_callback=
 
 
 def compare_audio_models(options, progress_callback=None, rows=None, status_callback=None, load_progress_callback=None):
+    """Compare audio models."""
     if status_callback:
         status_callback("Compare models: preparing logging and environment...")
     app_logging.configure_logging(options.log_file)
@@ -319,7 +345,9 @@ def compare_audio_models(options, progress_callback=None, rows=None, status_call
 
 
 def train_classifier(options, progress_callback=None, rows=None, status_callback=None):
+    """Train classifier."""
     def report_status(message):
+        """Report status."""
         if status_callback:
             status_callback(message)
 
@@ -368,6 +396,7 @@ def train_classifier(options, progress_callback=None, rows=None, status_callback
 
 
 def evaluate_report(options, status_callback=None, progress_callback=None):
+    """Evaluate report."""
     if status_callback:
         status_callback("Evaluate: loading rows and current tags...")
     rows = load_rows(options.source_paths, options.input_csv, options.mode, options.config_path, progress_callback=progress_callback)
@@ -379,6 +408,7 @@ def evaluate_report(options, status_callback=None, progress_callback=None):
 
 
 def calibrate(options, status_callback=None):
+    """Calibrate the requested value."""
     if status_callback:
         status_callback(f"Calibrate: reading {options.input_csv}...")
     tuned, examples = calibration.calibrate_from_csv(
@@ -393,6 +423,7 @@ def calibrate(options, status_callback=None):
 
 
 def apply_playlist_matches_to_rows(rows, match_rows):
+    """Apply playlist matches to rows."""
     row_by_path = {row.get("file_path", ""): row for row in rows if row.get("file_path")}
     matched_by_path = {}
     conflicts = set()
@@ -434,6 +465,7 @@ def apply_playlist_matches_to_rows(rows, match_rows):
 
 
 def match_label_playlists(options, rows, status_callback=None, progress_callback=None):
+    """Match label playlists."""
     if not rows:
         raise ValueError("Load local tracks before matching label playlists.")
     if not options.playlist_paths:
@@ -488,10 +520,12 @@ def match_label_playlists(options, rows, status_callback=None, progress_callback
 
 
 def save_manual_override(path, row, grouping, color="", note=""):
+    """Save manual override."""
     overrides.upsert_override(path, row, grouping, color, note)
 
 
 def apply_manual_corrections(rows, file_paths, grouping, color="", note="", overrides_csv="", mode="both", priority="", config_path=""):
+    """Apply manual corrections."""
     if config_path:
         core.load_category_config(config_path)
     selected = set(file_paths)
@@ -517,6 +551,7 @@ def apply_manual_corrections(rows, file_paths, grouping, color="", note="", over
 
 
 def plan_write_tags(options, progress_callback=None, status_callback=None):
+    """Plan write tags."""
     if not options.csv_path:
         raise ValueError("Choose a CSV file.")
     grouping = options.grouping_column or None
@@ -535,6 +570,7 @@ def plan_write_tags(options, progress_callback=None, status_callback=None):
 
 
 def plan_write_rows(rows, config_path, grouping_column=None, color_column=None, only_when_empty=False, progress_callback=None, status_callback=None):
+    """Plan write rows."""
     grouping = grouping_column or None
     color = color_column or None
     if not grouping and not color:
@@ -548,6 +584,7 @@ def plan_write_rows(rows, config_path, grouping_column=None, color_column=None, 
 
 
 def run_write_tags(options, log_callback, progress_callback=None, status_callback=None):
+    """Run write tags."""
     changes, skipped = plan_write_tags(options, progress_callback=progress_callback, status_callback=status_callback)
     if status_callback:
         status_callback(f"Write tags: {'writing' if options.apply_write else 'dry-run'} {len(changes)} planned changes...")
@@ -560,6 +597,7 @@ def run_write_tags(options, log_callback, progress_callback=None, status_callbac
 
 
 def run_write_rows(rows, config_path, grouping_column, color_column, apply_write=False, only_when_empty=False, log_callback=print, progress_callback=None, status_callback=None):
+    """Run write rows."""
     changes, skipped = plan_write_rows(
         rows,
         config_path,
@@ -580,6 +618,7 @@ def run_write_rows(rows, config_path, grouping_column, color_column, apply_write
 
 
 def plan_clear_rows(rows, config_path, progress_callback=None, status_callback=None):
+    """Plan clear rows."""
     core.load_category_config(config_path)
     if status_callback:
         status_callback(f"Clear tags: planning clears for {len(rows)} selected rows...")
@@ -588,6 +627,7 @@ def plan_clear_rows(rows, config_path, progress_callback=None, status_callback=N
 
 
 def run_clear_rows(rows, config_path, apply_write=False, log_callback=print, progress_callback=None, status_callback=None):
+    """Run clear rows."""
     changes, skipped = plan_clear_rows(rows, config_path, progress_callback=progress_callback, status_callback=status_callback)
     if status_callback:
         status_callback(f"Clear tags: {'clearing' if apply_write else 'dry-run'} {len(changes)} planned clears...")

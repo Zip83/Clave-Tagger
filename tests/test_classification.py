@@ -1,6 +1,6 @@
 import unittest
 
-from music_category import audio_model, config, report, text_classifier
+from music_category import audio_model, config, report, schemas, text_classifier
 
 
 class ClassificationTests(unittest.TestCase):
@@ -29,11 +29,16 @@ class ClassificationTests(unittest.TestCase):
             {"label": "Latin---Salsa", "score": 0.020},
         ]
 
-        category, confidence, scores, _reason = audio_model.classify_from_model(results, bpm=110)
+        category, confidence, scores, _reason = audio_model.classify_from_model(results)
 
         self.assertEqual(category, "Rumba")
         self.assertNotIn("Conga=0.075", scores)
         self.assertIn(confidence, {"high", "medium", "low"})
+
+    def test_bpm_is_not_part_of_report_schema_or_config_scoring(self):
+        self.assertNotIn("model_audio_bpm", schemas.MAIN_FIELDNAMES)
+        self.assertNotIn("model_audio_bpm", schemas.DETAIL_FIELDNAMES)
+        self.assertFalse(any("bpm_boosts" in item for item in config.category_items()))
 
     def test_recommendation_prefers_learned_model_tags_by_default(self):
         row = {
