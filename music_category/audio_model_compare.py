@@ -21,7 +21,7 @@ BASE_COMPARISON_FIELDS = [
 
 
 def comparison_models():
-    """Provide comparison models behavior."""
+    """Comparison models."""
     return [
         model for model in audio_model_catalog.load_catalog()
         if model.get("status") == "supported"
@@ -31,13 +31,13 @@ def comparison_models():
 
 
 def model_column_prefix(model):
-    """Provide model column prefix behavior."""
+    """Model column prefix."""
     name = re.sub(r"[^a-z0-9]+", "_", model.get("name", "").lower()).strip("_")
     return f"m{model.get('rank', 'x')}_{name}"
 
 
 def comparison_fieldnames(models=None):
-    """Provide comparison fieldnames behavior."""
+    """Comparison fieldnames."""
     fields = list(BASE_COMPARISON_FIELDS)
     for model in models if models is not None else comparison_models():
         prefix = model_column_prefix(model)
@@ -45,7 +45,6 @@ def comparison_fieldnames(models=None):
             f"{prefix}_model_id",
             f"{prefix}_grouping",
             f"{prefix}_confidence",
-            f"{prefix}_bpm",
             f"{prefix}_reason",
             f"{prefix}_top_labels",
             f"{prefix}_category_scores",
@@ -54,14 +53,13 @@ def comparison_fieldnames(models=None):
 
 
 def _base_row(row, models):
-    """Provide base row behavior."""
+    """Base row."""
     output = {field: row.get(field, "") for field in BASE_COMPARISON_FIELDS}
     for model in models:
         prefix = model_column_prefix(model)
         output[f"{prefix}_model_id"] = model.get("model_id", "")
         output[f"{prefix}_grouping"] = ""
         output[f"{prefix}_confidence"] = ""
-        output[f"{prefix}_bpm"] = ""
         output[f"{prefix}_reason"] = ""
         output[f"{prefix}_top_labels"] = ""
         output[f"{prefix}_category_scores"] = ""
@@ -73,18 +71,16 @@ def _apply_result(output_row, model, result):
     prefix = model_column_prefix(model)
     output_row[f"{prefix}_grouping"] = result.get("model_audio_suggested_grouping", "")
     output_row[f"{prefix}_confidence"] = result.get("model_audio_confidence", "")
-    output_row[f"{prefix}_bpm"] = result.get("model_audio_bpm", "")
     output_row[f"{prefix}_reason"] = result.get("model_audio_reason", "")
     output_row[f"{prefix}_top_labels"] = result.get("model_audio_top_labels", "")
     output_row[f"{prefix}_category_scores"] = result.get("model_audio_category_scores", "")
 
 
 def _error_result(error):
-    """Provide error result behavior."""
+    """Error result."""
     return {
         "model_audio_suggested_grouping": "Needs review",
         "model_audio_confidence": "review",
-        "model_audio_bpm": "",
         "model_audio_top_labels": "",
         "model_audio_category_scores": "",
         "model_audio_reason": f"audio model comparison error: {error}",

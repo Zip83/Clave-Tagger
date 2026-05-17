@@ -22,12 +22,12 @@ def apply_missing_tag_predictions(rows, mode, priority):
 
 
 def has_existing_grouping(row):
-    """Provide has existing grouping behavior."""
+    """Has existing grouping."""
     return bool(str(row.get("id3_grouping_normalized") or row.get("id3_grouping") or "").strip())
 
 
 def rows_missing_grouping(rows):
-    """Provide rows missing grouping behavior."""
+    """Rows missing grouping."""
     return [row for row in rows if not has_existing_grouping(row)]
 
 
@@ -42,7 +42,7 @@ def train_if_requested(args, parser, rows, classifier_path):
         args.classifier_output = str(app_paths.DEFAULT_HEAVY_CLASSIFIER)
     artifacts.prepare_artifacts("train", args, status_callback=print)
     def print_progress(payload):
-        """Provide print progress behavior."""
+        """Print progress."""
         message = payload.get("message")
         if message:
             print(message, flush=True)
@@ -69,7 +69,7 @@ def train_if_requested(args, parser, rows, classifier_path):
 
 
 def main():
-    """Provide main behavior."""
+    """Main."""
     parser = build_parser()
     args = parser.parse_args()
     app_paths.ensure_runtime_dirs()

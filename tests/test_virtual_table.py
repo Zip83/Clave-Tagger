@@ -47,11 +47,11 @@ class VirtualTableTests(unittest.TestCase):
         self.assertEqual(virtual_table.sorted_indexes(rows, indexes, "file_name", "desc"), [0, 1, 2])
 
     def test_sorted_indexes_sorts_numeric_values(self):
-        rows = [{"model_audio_bpm": "120.5"}, {"model_audio_bpm": ""}, {"model_audio_bpm": "89"}]
+        rows = [{"score": "120.5"}, {"score": ""}, {"score": "89"}]
         indexes = [0, 1, 2]
 
         self.assertEqual(
-            virtual_table.sorted_indexes(rows, indexes, "model_audio_bpm", "asc", {"model_audio_bpm"}),
+            virtual_table.sorted_indexes(rows, indexes, "score", "asc", {"score"}),
             [2, 0, 1],
         )
 

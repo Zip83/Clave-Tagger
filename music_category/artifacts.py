@@ -16,7 +16,7 @@ MERGE_REPORT_FIELDS = set(empty_prediction_fields()) | {
 
 
 def path_if_exists(path):
-    """Provide path if exists behavior."""
+    """Path if exists."""
     if not path:
         return None
     candidate = Path(path)
@@ -48,7 +48,7 @@ def detect_existing_artifacts(action, options):
 
 
 def backup_artifacts(paths, backup_root="backups", timestamp=None):
-    """Provide backup artifacts behavior."""
+    """Backup artifacts."""
     existing = [Path(path) for path in paths if path and Path(path).exists()]
     if not existing:
         return {}
@@ -76,7 +76,7 @@ def read_plain_csv(path):
 
 
 def merge_report_artifacts(rows, main_csv="", details_csv=""):
-    """Provide merge report artifacts behavior."""
+    """Merge report artifacts."""
     by_path = {row.get("file_path", ""): row for row in rows if row.get("file_path")}
     merged = 0
     for artifact_row in read_plain_csv(main_csv) + read_plain_csv(details_csv):
@@ -95,7 +95,7 @@ def merge_report_artifacts(rows, main_csv="", details_csv=""):
 
 
 def prepare_artifacts(action, options, status_callback=None):
-    """Provide prepare artifacts behavior."""
+    """Prepare artifacts."""
     found = detect_existing_artifacts(action, options)
     if getattr(options, "artifact_policy", ARTIFACT_POLICY_RESUME) == ARTIFACT_POLICY_FRESH:
         moved = backup_artifacts(found, getattr(options, "artifact_backup_dir", "backups"))

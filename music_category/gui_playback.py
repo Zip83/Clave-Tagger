@@ -10,7 +10,7 @@ from . import app_logging
 
 
 class GuiPlaybackMixin:
-    """Provide in-app playback, seek, and external-player fallback behavior."""
+    """In-app playback, seek, and external-player fallback."""
 
     def _playback_button(self, parent, text, command):
         """Create a small playback control button with the correct tooltip."""
@@ -21,19 +21,19 @@ class GuiPlaybackMixin:
             "stop_playback": "Stop playback.",
             "open_selected_external": "Open the selected track in the system player.",
         }
-        button = self._button(parent, text, command, tips.get(getattr(command, "__name__", ""), "Playback control."), width=3)
+        button = self._button(parent, text, command, tips.get(getattr(command, "__name__", ""), "Playback control."), width=6)
         self.playback_buttons.append(button)
         return button
 
     def _play_pause_button(self, parent):
         """Create a play/pause toggle and track it for icon refreshes."""
-        button = self._playback_button(parent, "▶", self.toggle_play_pause)
+        button = self._playback_button(parent, "Play", self.toggle_play_pause)
         self.play_pause_buttons.append(button)
         return button
 
     def _update_play_pause_buttons(self):
         """Refresh every play/pause button to match the current playback state."""
-        text = "▶" if self.playback_paused or not self.playing_file else "⏸"
+        text = "Play" if self.playback_paused or not self.playing_file else "Pause"
         for button in self.play_pause_buttons:
             try:
                 button.configure(text=text)

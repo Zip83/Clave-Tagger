@@ -14,7 +14,7 @@ from music_category.gui_table import GuiTableMixin
 
 
 class ToolTip:
-    """Provide ToolTip behavior."""
+    """ToolTip."""
     def __init__(self, widget, text):
         """Initialize this object."""
         self.widget = widget
@@ -36,14 +36,14 @@ class ToolTip:
         label.pack()
 
     def hide(self, _event=None):
-        """Provide hide behavior."""
+        """Hide."""
         if self.window:
             self.window.destroy()
             self.window = None
 
 
 class HoverText:
-    """Provide HoverText behavior."""
+    """HoverText."""
     def __init__(self, owner):
         """Initialize this object."""
         self.owner = owner
@@ -68,7 +68,7 @@ class HoverText:
         label.pack()
 
     def hide(self, _event=None):
-        """Provide hide behavior."""
+        """Hide."""
         if self.window:
             self.window.destroy()
             self.window = None
@@ -76,7 +76,7 @@ class HoverText:
 
 
 class MenuToolTip:
-    """Provide MenuToolTip behavior."""
+    """MenuToolTip."""
     def __init__(self, root, menu, descriptions):
         """Initialize this object."""
         self.menu = menu
@@ -98,7 +98,7 @@ class MenuToolTip:
 
 
 class NotebookToolTip:
-    """Provide NotebookToolTip behavior."""
+    """NotebookToolTip."""
     def __init__(self, root, notebook, descriptions):
         """Initialize this object."""
         self.notebook = notebook
@@ -118,7 +118,7 @@ class NotebookToolTip:
 
 
 class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
-    """Provide MusicCategoryGui behavior."""
+    """MusicCategoryGui."""
     def __init__(self):
         """Initialize this object."""
         super().__init__()
@@ -396,21 +396,21 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self.menu_tooltips.append(MenuToolTip(self, menu, descriptions))
 
     def _label(self, parent, text, tooltip=""):
-        """Provide label behavior."""
+        """Label."""
         label = ttk.Label(parent, text=text)
         if tooltip:
             ToolTip(label, tooltip)
         return label
 
     def _button(self, parent, text, command, tooltip="", **kwargs):
-        """Provide button behavior."""
+        """Button."""
         button = ttk.Button(parent, text=text, command=command, **kwargs)
         if tooltip:
             ToolTip(button, tooltip)
         return button
 
     def _labeled_entry(self, parent, label, variable, width=24, tooltip=""):
-        """Provide labeled entry behavior."""
+        """Labeled entry."""
         label_widget = self._label(parent, label, tooltip)
         label_widget.pack(side=tk.LEFT)
         entry = ttk.Entry(parent, textvariable=variable, width=width)
@@ -418,7 +418,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return entry
 
     def _track_dependency(self, group, *widgets):
-        """Provide track dependency behavior."""
+        """Track dependency."""
         self.dependent_widgets.setdefault(group, []).extend(widgets)
 
     def _set_widgets_enabled(self, group, enabled):
@@ -503,8 +503,8 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         ttk.Separator(action_row, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=8)
         self._label(action_row, "Playback:", "Controls the selected table row. Playback remains available while analysis is running.").pack(side=tk.LEFT, padx=(0, 5))
         self._play_pause_button(action_row).pack(side=tk.LEFT)
-        self._playback_button(action_row, "■", self.stop_playback).pack(side=tk.LEFT)
-        self._playback_button(action_row, "↗", self.open_selected_external).pack(side=tk.LEFT, padx=(2, 8))
+        self._playback_button(action_row, "Stop", self.stop_playback).pack(side=tk.LEFT)
+        self._playback_button(action_row, "Open", self.open_selected_external).pack(side=tk.LEFT, padx=(2, 8))
         seek = ttk.Scale(action_row, from_=0, to=300, variable=self.playback_seek, orient=tk.HORIZONTAL)
         seek.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
         self._bind_seek_control(seek)
@@ -549,7 +549,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         mode_combo.pack(side=tk.LEFT, padx=5)
         full_track = ttk.Checkbutton(r, text="Full-track audio", variable=self.model_full_track)
         full_track.pack(side=tk.LEFT, padx=(4, 8))
-        ToolTip(full_track, "Analyze the whole song by averaging 30s audio-model chunks. Slower, but usually more stable than one 30s clip.")
+        ToolTip(full_track, "Analyze the whole song by averaging 30s audio-model chunks and extracting whole-track Librosa features.")
         self._track_dependency("audio_model", full_track)
         only_missing = ttk.Checkbutton(r, text="Only missing Grouping", variable=self.only_missing_grouping)
         only_missing.pack(side=tk.LEFT, padx=(4, 8))
@@ -605,12 +605,12 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         backend_combo = ttk.Combobox(r, textvariable=self.classifier_backend, values=("light", "heavy", "auto"), state="readonly", width=8)
         backend_combo.pack(side=tk.LEFT, padx=5)
         backend_combo.bind("<<ComboboxSelected>>", self.on_classifier_backend_selected)
-        classifier_use_entry = self._labeled_entry(r, "Use:", self.classifier_path, 24, "Existing classifier file used by learned/all analysis after it has already been trained.")
+        classifier_use_entry = self._labeled_entry(r, "Use classifier:", self.classifier_path, 24, "Existing classifier file used by learned/all analysis after it has already been trained.")
         classifier_use_button = self._button(r, "Browse", self.browse_classifier, "Select a trained classifier file for learned/all analysis.")
         classifier_use_button.pack(side=tk.LEFT)
         self._track_dependency("learned_classifier", classifier_use_entry, classifier_use_button)
         r = ttk.Frame(classifier); r.pack(fill=tk.X, pady=2)
-        classifier_input_entry = self._labeled_entry(r, "Input:", self.classifier_input, 24, "Optional details CSV for light training. It supplies MAEST/model feature columns when the main rows do not have them.")
+        classifier_input_entry = self._labeled_entry(r, "Details CSV:", self.classifier_input, 24, "Optional details CSV for light training. It supplies MAEST/model and Librosa audio feature columns when the main rows do not have them.")
         classifier_input_button = self._button(r, "Browse", self.browse_classifier_input, "Select an optional details CSV used during light training.")
         classifier_input_button.pack(side=tk.LEFT)
         self._track_dependency("light_training", classifier_input_entry, classifier_input_button)
@@ -619,7 +619,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         r = ttk.Frame(classifier); r.pack(fill=tk.X, pady=2)
         heavy_epochs_entry = self._labeled_entry(r, "Epochs:", self.heavy_epochs, 5, "Number of heavy-model training passes over the training data.")
         heavy_batch_entry = self._labeled_entry(r, "Batch:", self.heavy_batch_size, 5, "Number of audio chunks processed per training step.")
-        heavy_lr_entry = self._labeled_entry(r, "LR:", self.heavy_learning_rate, 8, "Learning rate for heavy-model training.")
+        heavy_lr_entry = self._labeled_entry(r, "Learning rate:", self.heavy_learning_rate, 8, "Learning rate for heavy-model training.")
         heavy_max_files_entry = self._labeled_entry(r, "Max files:", self.heavy_max_files, 7, "Optional tagged-file limit for experiments. Empty means use all tagged files from the training source.")
         heavy_max_chunks_entry = self._labeled_entry(r, "Max chunks:", self.heavy_max_chunks, 7, "Optional chunks per file. Empty means use the whole song split into 30-second chunks.")
         self._track_dependency("heavy_training", heavy_epochs_entry, heavy_batch_entry, heavy_lr_entry, heavy_max_files_entry, heavy_max_chunks_entry)
@@ -704,7 +704,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         columns = (
             "file_name", "id3_grouping_normalized", "id3_color", "tag_suggested_grouping",
             "model_audio_suggested_grouping", "learned_suggested_grouping", "recommended_grouping",
-            "target_grouping", "target_color", "recommended_source", "recommended_confidence", "model_audio_bpm",
+            "target_grouping", "target_color", "recommended_source", "recommended_confidence",
         )
         self.tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=8, selectmode="extended")
         headings = {
@@ -712,12 +712,12 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             "tag_suggested_grouping": "Tag Guess", "model_audio_suggested_grouping": "MAEST Guess",
             "learned_suggested_grouping": "Learned Guess", "recommended_grouping": "Recommended",
             "target_grouping": "Target Grouping", "target_color": "Target Color",
-            "recommended_source": "Source", "recommended_confidence": "Confidence", "model_audio_bpm": "BPM",
+            "recommended_source": "Source", "recommended_confidence": "Confidence",
         }
         self.column_headings = dict(headings)
         widths = {"file_name": 240, "id3_grouping_normalized": 115, "id3_color": 95, "tag_suggested_grouping": 110,
                   "model_audio_suggested_grouping": 110, "learned_suggested_grouping": 110, "recommended_grouping": 110,
-                  "target_grouping": 110, "target_color": 95, "recommended_source": 70, "recommended_confidence": 80, "model_audio_bpm": 55}
+                  "target_grouping": 110, "target_color": 95, "recommended_source": 70, "recommended_confidence": 80}
         for column in columns:
             self.tree.heading(column, text=headings[column], command=lambda selected=column: self.toggle_table_sort(selected))
             self.tree.column(column, width=widths[column], stretch=column == "file_name")
@@ -781,8 +781,8 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         write_button.pack(fill=tk.X, pady=2)
 
         self._play_pause_button(player).pack(side=tk.LEFT)
-        self._playback_button(player, "■", self.stop_playback).pack(side=tk.LEFT)
-        self._playback_button(player, "↗", self.open_selected_external).pack(side=tk.LEFT, padx=4)
+        self._playback_button(player, "Stop", self.stop_playback).pack(side=tk.LEFT)
+        self._playback_button(player, "Open", self.open_selected_external).pack(side=tk.LEFT, padx=4)
         self.seek = ttk.Scale(player, from_=0, to=300, variable=self.playback_seek, orient=tk.HORIZONTAL)
         self.seek.pack(fill=tk.X, pady=6)
         self._bind_seek_control(self.seek)
@@ -845,7 +845,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         for path in subfolders:
             listbox.insert(tk.END, path)
         def accept():
-            """Provide accept behavior."""
+            """Accept."""
             for index in listbox.curselection():
                 path = listbox.get(index)
                 if path not in self.source_paths:
@@ -856,7 +856,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self._button(dialog, "Add Selected", accept, "Add all selected subfolders as recursive sources.").pack(pady=6)
 
     def manage_sources(self):
-        """Provide manage sources behavior."""
+        """Manage sources."""
         dialog = tk.Toplevel(self)
         dialog.title("Sources")
         dialog.geometry("760x360")
@@ -963,7 +963,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             self.config_path.set(path)
 
     def _audio_model_description(self, preset):
-        """Provide audio model description behavior."""
+        """Audio model description."""
         status = preset.get("status", "")
         model_id = preset.get("model_id") or "no model id"
         return (
@@ -973,7 +973,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         ).strip()
 
     def on_audio_model_preset_selected(self, _event=None):
-        """Provide on audio model preset selected behavior."""
+        """On audio model preset selected."""
         preset = audio_model_catalog.find_by_label(self.audio_model_preset.get(), self.audio_model_presets)
         if not preset:
             return
@@ -1003,7 +1003,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             self._append_log(message)
 
     def on_classifier_preset_selected(self, _event=None):
-        """Provide on classifier preset selected behavior."""
+        """On classifier preset selected."""
         preset = classifier_presets.get(self.classifier_preset.get())
         self.classifier_backend.set(preset["backend"])
         self._sync_classifier_paths_for_backend(preset["backend"])
@@ -1016,7 +1016,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self.status_label.configure(text=preset["description"])
 
     def on_classifier_backend_selected(self, _event=None):
-        """Provide on classifier backend selected behavior."""
+        """On classifier backend selected."""
         backend = self.classifier_backend.get()
         self._sync_classifier_paths_for_backend(backend)
 
@@ -1093,11 +1093,11 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             self._append_log("Cancellation requested.")
 
     def _optional_int(self, value):
-        """Provide optional int behavior."""
+        """Optional int."""
         return int(value) if str(value).strip() else None
 
     def _report_options(self):
-        """Provide report options behavior."""
+        """Report options."""
         return gui_services.ReportOptions(
             source_paths=list(self.source_paths), input_csv=self.input_csv.get().strip(),
             output_csv=self.output_csv.get().strip(), details_csv=self.details_csv.get().strip(),
@@ -1187,7 +1187,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return result.get() or None
 
     def preview_sources(self):
-        """Provide preview sources behavior."""
+        """Preview sources."""
         if not self.source_paths and not self.input_csv.get().strip():
             self.rows = []
             self._clear_table_state()
@@ -1195,7 +1195,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             self.message_queue.put(("status", "Preview cleared. Add a folder or input CSV when ready."))
             return
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 self.message_queue.put(("phase", "Preview: scanning folders and reading current tags..."))
                 rows = gui_services.preview_rows(
@@ -1217,10 +1217,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
     def estimate_report(self):
         """Estimate report."""
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 _rows, status = gui_services.estimate_report(
                     self._report_options(),
@@ -1245,10 +1245,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         options.artifact_policy = policy
 
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
 
                 if current_table_rows:
@@ -1305,10 +1305,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         options.artifact_policy = policy
 
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 phase("Compare models: scanning folders and reading current tags...")
                 rows = gui_services.preview_rows(
@@ -1347,13 +1347,13 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         options.artifact_policy = policy
 
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def train_callback(payload):
                     """Train callback."""
                     self.message_queue.put(("training_progress", payload))
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 rows = None
                 if options.training_source == "Current loaded tracks":
@@ -1404,10 +1404,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
     def evaluate_report(self):
         """Evaluate report."""
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 options = gui_services.EvaluationOptions(list(self.source_paths), self.input_csv.get(), self.mode.get(), self.config_path.get(), self.prediction_column.get(), self.truth_column.get())
                 _rows, status = gui_services.evaluate_report(
@@ -1426,10 +1426,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
     def calibrate_report(self):
         """Calibrate report."""
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 input_csv = self.input_csv.get().strip() or self.output_csv.get().strip()
                 options = gui_services.CalibrationOptions(input_csv, self.calibration_output.get().strip(), self.mismatch_output.get().strip(), self.truth_column.get().strip())
@@ -1445,10 +1445,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
     def run_write_tags(self):
         """Run write tags."""
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, skipped = gui_services.run_write_tags(
                     self._write_options(),
@@ -1467,10 +1467,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
     def run_write_grouping_only(self):
         """Run write grouping only."""
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, skipped = gui_services.run_write_tags(
                     self._write_options(grouping_column=self.value_column.get().strip(), color_column=""),
@@ -1487,7 +1487,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self._start_worker(worker)
 
     def _selected_row(self):
-        """Provide selected row behavior."""
+        """Selected row."""
         selected = self.tree.selection()
         if not selected:
             return None
@@ -1498,16 +1498,16 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return None
 
     def _selected_rows(self):
-        """Provide selected rows behavior."""
+        """Selected rows."""
         selected = set(self.tree.selection())
         return [row for row in self.rows if row.get("file_path") in selected]
 
     def _rows_in_table_order(self):
-        """Provide rows in table order behavior."""
+        """Rows in table order."""
         return list(self.rows)
 
     def on_row_selected(self, _event=None):
-        """Provide on row selected behavior."""
+        """On row selected."""
         row = self._selected_row()
         selected_count = len(self.tree.selection())
         self.selection_info.set(f"{selected_count} selected" if selected_count else "No tracks selected")
@@ -1529,7 +1529,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return "break"
 
     def _review_details_text(self, row):
-        """Provide review details text behavior."""
+        """Review details text."""
         fields = [
             ("File", row.get("file_name", "")),
             ("Path", row.get("file_path", "")),
@@ -1543,8 +1543,8 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             ("Tag Guess", f"{row.get('tag_suggested_grouping', '')} ({row.get('tag_confidence', '')})"),
             ("Tag Reason", row.get("tag_reason", "")),
             ("MAEST Guess", f"{row.get('model_audio_suggested_grouping', '')} ({row.get('model_audio_confidence', '')})"),
-            ("MAEST BPM", row.get("model_audio_bpm", "")),
             ("MAEST Top Labels", row.get("model_audio_top_labels", "")),
+            ("Audio Features", row.get("model_audio_features", "")),
             ("MAEST Reason", row.get("model_audio_reason", "")),
             ("Learned Guess", f"{row.get('learned_suggested_grouping', '')} ({row.get('learned_confidence', '')})"),
             ("Learned Reason", row.get("learned_reason", "")),
@@ -1555,7 +1555,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return "\n".join(f"{label}: {value}" for label, value in fields if value)
 
     def open_selected_review(self, _event=None):
-        """Provide open selected review behavior."""
+        """Open selected review."""
         if _event is not None and hasattr(_event, "y"):
             item = self.tree.identify_row(_event.y)
             if item:
@@ -1599,7 +1599,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             details.configure(state="disabled")
 
         def move_review(offset):
-            """Provide move review behavior."""
+            """Move review."""
             if not self.filtered_row_indexes:
                 return
             selected = self.tree.selection()
@@ -1663,21 +1663,21 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         player = ttk.LabelFrame(edit_frame, text="Player", padding=8)
         player.grid(row=9, column=0, sticky="ew")
         self._play_pause_button(player).pack(side=tk.LEFT)
-        self._playback_button(player, "■", self.stop_playback).pack(side=tk.LEFT)
-        self._playback_button(player, "↗", self.open_selected_external).pack(side=tk.LEFT, padx=4)
+        self._playback_button(player, "Stop", self.stop_playback).pack(side=tk.LEFT)
+        self._playback_button(player, "Open", self.open_selected_external).pack(side=tk.LEFT, padx=4)
         seek = ttk.Scale(player, from_=0, to=300, variable=self.playback_seek, orient=tk.HORIZONTAL)
         seek.pack(fill=tk.X, expand=True, padx=4)
         self._bind_seek_control(seek)
         ttk.Label(edit_frame, textvariable=self.playback_time).grid(row=10, column=0, sticky="w", pady=(6, 0))
 
     def on_bulk_grouping_selected(self, _event=None):
-        """Provide on bulk grouping selected behavior."""
+        """On bulk grouping selected."""
         grouping = self.bulk_target_grouping.get().strip()
         if grouping:
             self.bulk_target_color.set(config.category_to_color(grouping))
 
     def on_target_grouping_selected(self, _event=None):
-        """Provide on target grouping selected behavior."""
+        """On target grouping selected."""
         grouping = self.selected_target_grouping.get().strip()
         if grouping:
             self.selected_target_color.set(config.category_to_color(grouping))
@@ -1755,7 +1755,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return config.category_to_color(grouping) if grouping else ""
 
     def _row_has_pending_tag_write(self, row):
-        """Provide row has pending tag write behavior."""
+        """Row has pending tag write."""
         grouping = self._write_candidate_grouping(row)
         if not grouping:
             return False
@@ -1769,7 +1769,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return bool(color and row.get("id3_color", "") != color)
 
     def _rebuild_pending_tag_paths(self, rows=None):
-        """Provide rebuild pending tag paths behavior."""
+        """Rebuild pending tag paths."""
         rows = self.rows if rows is None else rows
         self.pending_tag_paths = {
             row.get("file_path", "")
@@ -1779,7 +1779,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self._update_pending_title()
 
     def _update_pending_path(self, row):
-        """Provide update pending path behavior."""
+        """Update pending path."""
         file_path = row.get("file_path", "")
         if not file_path:
             return
@@ -1790,7 +1790,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self._update_pending_title()
 
     def _pending_tag_rows(self):
-        """Provide pending tag rows behavior."""
+        """Pending tag rows."""
         return [
             row
             for row in self.rows
@@ -1798,7 +1798,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         ]
 
     def _prepared_pending_tag_rows(self):
-        """Provide prepared pending tag rows behavior."""
+        """Prepared pending tag rows."""
         prepared = []
         for row in self._pending_tag_rows():
             grouping = self._write_candidate_grouping(row)
@@ -1809,14 +1809,14 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         return prepared
 
     def _update_pending_title(self):
-        """Provide update pending title behavior."""
+        """Update pending title."""
         count = len(self.pending_tag_paths)
         self.pending_tags_status.set(f"Pending tags: {count}")
         suffix = f" - {count} pending tag{'s' if count != 1 else ''}" if count else ""
         self.title(f"{'* ' if count else ''}{app_paths.APP_NAME}{suffix}")
 
     def _changed_paths_from_changes(self, changes):
-        """Provide changed paths from changes behavior."""
+        """Changed paths from changes."""
         return {file_path for file_path, _row_changes in changes if file_path}
 
     def _read_metadata_for_paths(self, paths):
@@ -1833,10 +1833,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
             return
 
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, _skipped = gui_services.run_write_rows(
                     pending_rows,
@@ -1868,10 +1868,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         selected_path = row.get("file_path", "")
 
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, _skipped = gui_services.run_write_rows(
                     [dict(row)],
@@ -1907,10 +1907,10 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         rows_to_clear = [dict(row) for row in selected_rows]
 
         def worker():
-            """Provide worker behavior."""
+            """Worker."""
             try:
                 def phase(message):
-                    """Provide phase behavior."""
+                    """Phase."""
                     self.message_queue.put(("phase", message))
                 changes, _skipped = gui_services.run_clear_rows(
                     rows_to_clear,
@@ -1934,7 +1934,7 @@ class MusicCategoryGui(GuiDialogsMixin, GuiPlaybackMixin, GuiTableMixin, tk.Tk):
         self._start_worker(worker)
 
     def _poll_queue(self):
-        """Provide poll queue behavior."""
+        """Poll queue."""
         processed_messages = 0
         deadline = time.monotonic() + 0.035
         try:

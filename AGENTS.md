@@ -26,6 +26,7 @@ Keep responsibilities separated:
 - `music_category/report_estimate.py`: runtime estimation.
 - `music_category/id3_tags.py`: ID3 read/write helpers.
 - `music_category/text_classifier.py`: metadata and filename classification.
+- `music_category/audio_features.py`: Librosa rhythm, timbre, spectral, harmonic, and percussive feature extraction.
 - `music_category/audio_model.py`: MAEST audio model integration and audio-label mapping.
 - `music_category/model_runner.py`: MAEST report execution and progress callbacks.
 - `music_category/light_model.py`: light learned classifier implementation.
@@ -168,6 +169,7 @@ Use mocks for slow or external behavior. Put GUI workflow tests against `music_c
 - Prefer plain functions and dataclasses unless a class adds real state or behavior.
 - Keep compatibility imports in `music_category_report.py` working for the GUI and existing scripts.
 - Use config-driven behavior for style/category additions.
+- Do not use BPM as a classification or training feature for Latin categories.
 - Add tests for new classification rules, recommendation changes, write planning, calibration, overrides, and service workflows.
 - Avoid long-running operations in unit tests.
 
@@ -180,3 +182,7 @@ Update documentation when changing user-facing behavior:
 - `AGENTS.md`: guidance for future agents.
 
 For new CLI switches, update `README.md` and make sure `--help` remains clear.
+
+## Release Builds
+
+Windows release ZIPs are built with PyInstaller in folder/onedir mode through `scripts/build_windows.ps1` and `.github/workflows/windows-release.yml`. Do not commit generated `build/`, `dist/`, `release/`, `.spec`, or ZIP artifacts.

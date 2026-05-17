@@ -37,7 +37,7 @@ def normalize_text(value):
 
 
 def config_key(value):
-    """Provide config key behavior."""
+    """Config key."""
     return normalize_text((value or "").replace("#", "hash "))
 
 
@@ -70,17 +70,17 @@ def load_category_config(config_path):
 
 
 def category_items():
-    """Provide category items behavior."""
+    """Category items."""
     return CATEGORY_CONFIG.get("categories", [])
 
 
 def text_classification_config():
-    """Provide text classification config behavior."""
+    """Text classification config."""
     return CATEGORY_CONFIG.get("text_classification", {})
 
 
 def find_category_item(category):
-    """Provide find category item behavior."""
+    """Find category item."""
     for item in category_items():
         if item.get("category") == category:
             return item
@@ -108,19 +108,19 @@ def normalize_color(value):
 
 
 def category_to_grouping(value):
-    """Provide category to grouping behavior."""
+    """Category to grouping."""
     category = normalize_value_to_category(value)
     return CATEGORY_TO_GROUPING.get(category, value.strip() if value else "")
 
 
 def category_to_color(value):
-    """Provide category to color behavior."""
+    """Category to color."""
     category = normalize_value_to_category(value)
     return CATEGORY_TO_COLOR.get(category, value.strip() if value else "")
 
 
 def pattern_matches(text, pattern):
-    """Provide pattern matches behavior."""
+    """Pattern matches."""
     normalized_pattern = normalize_text(pattern)
     if not normalized_pattern:
         return False
@@ -128,7 +128,7 @@ def pattern_matches(text, pattern):
 
 
 def model_label_specs(item):
-    """Provide model label specs behavior."""
+    """Model label specs."""
     specs = []
     for spec in item.get("model_labels", []):
         if isinstance(spec, dict):

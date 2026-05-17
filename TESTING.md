@@ -44,6 +44,7 @@ or on Windows:
 - GUI service workflow logic without opening Tkinter windows.
 - Runtime path defaults, `.gitignore` hygiene, calibration output, and decode-error handling.
 - Native decoder stderr capture so malformed MP3 messages go to the log instead of flooding the console.
+- Librosa audio feature extraction without BPM-based classifier features.
 
 ## What The Unit Tests Intentionally Avoid
 
@@ -57,3 +58,13 @@ Useful manual checks:
 .venv-maest\Scripts\python.exe music_category_report.py --source "C:\Music" --train-classifier --classifier-backend heavy --classifier-output models\learned_heavy.pt --heavy-max-files 20 --heavy-max-chunks-per-file 2
 .venv-maest\Scripts\python.exe music_category_report.py --calibrate-from-csv reports\report_main.csv --calibration-output category_config.tuned.json
 ```
+
+## Build Windows Release ZIP
+
+From the project root on Windows:
+
+```powershell
+.\scripts\build_windows.ps1 -Python .venv-maest\Scripts\python.exe -Version local
+```
+
+The script runs tests first, then creates a folder-based PyInstaller ZIP. Generated `build/`, `dist/`, `release/`, `.spec`, and ZIP files are ignored by git.

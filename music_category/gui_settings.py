@@ -24,7 +24,7 @@ def save_settings(settings, path=app_paths.DEFAULT_GUI_SETTINGS):
 
 
 def collect_variables(variables):
-    """Provide collect variables behavior."""
+    """Collect variables."""
     return {name: variable.get() for name, variable in variables.items()}
 
 

@@ -6,7 +6,7 @@ from . import config, csv_io
 
 
 def row_truth_values(row, truth_column):
-    """Provide row truth values behavior."""
+    """Row truth values."""
     return [part.strip() for part in row.get(truth_column, "").split(";") if part.strip()]
 
 
@@ -42,7 +42,7 @@ def analyze_mismatches(rows, truth_column="id3_grouping_normalized"):
 
 
 def tuned_config_from_summary(summary):
-    """Provide tuned config from summary behavior."""
+    """Tuned config from summary."""
     tuned = json.loads(json.dumps(config.CATEGORY_CONFIG, ensure_ascii=False))
     notes = []
     for source, counter in summary.items():

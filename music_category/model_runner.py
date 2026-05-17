@@ -9,7 +9,7 @@ FULL_TRACK_CACHE_SUFFIX = "::full_track"
 
 
 def model_cache_key(row, full_track=False, model_id=None):
-    """Provide model cache key behavior."""
+    """Model cache key."""
     file_path = row["file_path"]
     model_id = model_id or audio_model.MODEL_ID
     if not full_track and model_id == audio_model.MODEL_ID:
@@ -19,7 +19,7 @@ def model_cache_key(row, full_track=False, model_id=None):
 
 
 def cached_model_results(rows, progress_path, full_track=False, model_id=None):
-    """Provide cached model results behavior."""
+    """Cached model results."""
     cached = progress.load_progress(progress_path)
     for row in rows:
         result = cached.get(model_cache_key(row, full_track, model_id))
@@ -104,9 +104,9 @@ def run_model_analysis(
             result = {
                 "model_audio_suggested_grouping": "Needs review",
                 "model_audio_confidence": "review",
-                "model_audio_bpm": "",
                 "model_audio_top_labels": "",
                 "model_audio_category_scores": "",
+                "model_audio_features": "",
                 "model_audio_reason": f"audio model analysis error: {error}",
             }
         row.update(result)
@@ -119,7 +119,7 @@ def run_model_analysis(
         remaining = average * (len(pending) - processed)
         print(
             f"  -> {result['model_audio_suggested_grouping']} ({result['model_audio_confidence']}), "
-            f"bpm={result['model_audio_bpm']}, file={elapsed:.1f}s, eta={progress.format_duration(remaining)}",
+            f"file={elapsed:.1f}s, eta={progress.format_duration(remaining)}",
             flush=True,
         )
         if progress_callback:
@@ -133,7 +133,7 @@ def run_model_analysis(
                     "total": len(rows),
                     "elapsed": elapsed,
                     "eta_seconds": remaining,
-                    "message": f"{row['file_name']} -> {result['model_audio_suggested_grouping']} ({result['model_audio_confidence']}), bpm={result['model_audio_bpm']}",
+                    "message": f"{row['file_name']} -> {result['model_audio_suggested_grouping']} ({result['model_audio_confidence']})",
                 }
             )
         if processed % 5 == 0:

@@ -25,7 +25,7 @@ class HardeningTests(unittest.TestCase):
     def test_gitignore_excludes_runtime_artifacts(self):
         text = Path(".gitignore").read_text(encoding="utf-8")
 
-        for pattern in [".venv*/", ".env", "reports/*", "progress/*", "logs/*", "models/*", "settings/*", "*.joblib", "*.pt", "uv.exe"]:
+        for pattern in [".venv*/", ".env", "reports/*", "progress/*", "logs/*", "models/*", "settings/*", "*.joblib", "*.pt", "uv.exe", "build/", "dist/", "release/", "*.spec"]:
             self.assertIn(pattern, text)
 
     def test_gui_settings_round_trip_known_values(self):

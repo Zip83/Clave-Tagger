@@ -31,7 +31,7 @@ def preferred_torch_threads(cpu_count=None, env_value=None):
 
 
 def configure_torch_runtime(torch_module):
-    """Provide configure torch runtime behavior."""
+    """Configure torch runtime."""
     thread_count = preferred_torch_threads()
     try:
         torch_module.set_num_threads(thread_count)
@@ -45,7 +45,7 @@ def configure_torch_runtime(torch_module):
 
 
 def waveform_to_log_mel(audio, sample_rate=audio_model.SAMPLE_RATE, n_mels=N_MELS, target_frames=TARGET_FRAMES):
-    """Provide waveform to log mel behavior."""
+    """Waveform to log mel."""
     import librosa
     import numpy as np
     import torch
@@ -82,7 +82,7 @@ def load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATION):
 
 
 def safe_load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATION):
-    """Provide safe load file tensor behavior."""
+    """Safe load file tensor."""
     try:
         return load_file_tensor(file_path, clip_offset=clip_offset, clip_duration=clip_duration)
     except Exception as error:
@@ -91,7 +91,7 @@ def safe_load_file_tensor(file_path, clip_offset=0.0, clip_duration=CHUNK_DURATI
 
 
 def chunk_starts_for_file(file_path, chunk_duration=CHUNK_DURATION, chunk_stride=CHUNK_STRIDE):
-    """Provide chunk starts for file behavior."""
+    """Chunk starts for file."""
     duration, _caught, _stderr_output = audio_decode.get_duration(file_path)
     if duration <= chunk_duration:
         return [0.0]
@@ -109,7 +109,7 @@ def chunk_starts_for_file(file_path, chunk_duration=CHUNK_DURATION, chunk_stride
 
 
 class AudioCnn:
-    """Provide AudioCnn behavior."""
+    """AudioCnn."""
     @staticmethod
     def create(num_classes):
         """Create the requested value."""
@@ -134,7 +134,7 @@ class AudioCnn:
 
 
 def collect_labeled_audio_rows(rows, truth_column="id3_grouping_normalized", limit=None, progress_callback=None, cancel_token=None):
-    """Provide collect labeled audio rows behavior."""
+    """Collect labeled audio rows."""
     samples = []
     skipped_no_truth = 0
     skipped_missing_file = 0
@@ -206,7 +206,7 @@ def collect_labeled_audio_rows(rows, truth_column="id3_grouping_normalized", lim
 
 
 def expand_samples_to_chunks(samples, max_chunks_per_file=None, progress_callback=None, cancel_token=None):
-    """Provide expand samples to chunks behavior."""
+    """Expand samples to chunks."""
     expanded = []
     total = len(samples)
     for index, (row, label) in enumerate(samples, start=1):
@@ -247,7 +247,7 @@ def expand_samples_to_chunks(samples, max_chunks_per_file=None, progress_callbac
 
 
 class AudioDataset:
-    """Provide AudioDataset behavior."""
+    """AudioDataset."""
     def __init__(self, chunk_samples, label_to_index, cancel_token=None):
         """Initialize this object."""
         self.chunk_samples = chunk_samples
@@ -255,11 +255,11 @@ class AudioDataset:
         self.cancel_token = cancel_token
 
     def __len__(self):
-        """Provide len behavior."""
+        """Len."""
         return len(self.chunk_samples)
 
     def __getitem__(self, index):
-        """Provide getitem behavior."""
+        """Getitem."""
         import torch
 
         if self.cancel_token:
@@ -274,7 +274,7 @@ class AudioDataset:
 
 
 def collate_valid_training_batch(batch):
-    """Provide collate valid training batch behavior."""
+    """Collate valid training batch."""
     import torch
 
     valid = [item for item in batch if item is not None]

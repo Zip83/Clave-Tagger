@@ -6,7 +6,7 @@ from .schemas import DETAIL_FIELDNAMES, MAIN_FIELDNAMES, MODES_THAT_USE_TAGS, em
 
 
 def iter_mp3_files(source_paths):
-    """Provide iter mp3 files behavior."""
+    """Iter mp3 files."""
     for source_path in source_paths:
         source = Path(source_path)
         for file_path in sorted(source.rglob("*.mp3")):

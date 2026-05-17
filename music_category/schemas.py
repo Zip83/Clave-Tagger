@@ -23,7 +23,6 @@ MAIN_FIELDNAMES = [
     "tag_confidence",
     "model_audio_suggested_grouping",
     "model_audio_confidence",
-    "model_audio_bpm",
     "learned_suggested_grouping",
     "learned_confidence",
     "recommended_grouping",
@@ -39,22 +38,23 @@ DETAIL_FIELDNAMES = [
     "tag_reason",
     "model_audio_top_labels",
     "model_audio_category_scores",
+    "model_audio_features",
     "model_audio_reason",
     "learned_reason",
 ]
 
 
 def empty_prediction_fields():
-    """Provide empty prediction fields behavior."""
+    """Empty prediction fields."""
     return {
         "tag_suggested_grouping": "",
         "tag_confidence": "",
         "tag_reason": "",
         "model_audio_suggested_grouping": "",
         "model_audio_confidence": "",
-        "model_audio_bpm": "",
         "model_audio_top_labels": "",
         "model_audio_category_scores": "",
+        "model_audio_features": "",
         "model_audio_reason": "",
         "learned_suggested_grouping": "",
         "learned_confidence": "",

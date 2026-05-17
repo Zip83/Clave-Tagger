@@ -36,7 +36,7 @@ def apply_overrides(rows, path):
 
 
 def upsert_override(path, row, manual_grouping, manual_color="", note=""):
-    """Provide upsert override behavior."""
+    """Upsert override."""
     overrides = read_overrides(path)
     file_path = row.get("file_path", "")
     overrides[file_path] = {

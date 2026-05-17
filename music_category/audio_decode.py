@@ -8,7 +8,7 @@ from . import app_logging
 
 @contextlib.contextmanager
 def _capture_native_stderr():
-    """Provide capture native stderr behavior."""
+    """Capture native stderr."""
     original_fd = None
     temp = None
     capture_failed = False
@@ -88,7 +88,7 @@ def load_audio(file_path, sample_rate, mono=True, offset=0.0, duration=None):
 
 
 def get_duration(file_path):
-    """Provide get duration behavior."""
+    """Get duration."""
     import librosa
 
     return run_with_decode_capture(file_path, lambda: float(librosa.get_duration(path=str(file_path))))

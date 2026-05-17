@@ -2,19 +2,19 @@ import re
 
 
 def clamp_start(start, total, window_size):
-    """Provide clamp start behavior."""
+    """Clamp start."""
     if total <= 0:
         return 0
     return max(0, min(int(start), max(0, total - max(1, window_size))))
 
 
 def matching_indexes(rows, predicate):
-    """Provide matching indexes behavior."""
+    """Matching indexes."""
     return [index for index, row in enumerate(rows) if predicate(row)]
 
 
 def numeric_value(value):
-    """Provide numeric value behavior."""
+    """Numeric value."""
     match = re.search(r"-?\d+(?:\.\d+)?", str(value or ""))
     if not match:
         return None
@@ -22,7 +22,7 @@ def numeric_value(value):
 
 
 def sort_key(row, column, numeric_columns=None):
-    """Provide sort key behavior."""
+    """Sort key."""
     numeric_columns = set(numeric_columns or [])
     value = row.get(column, "")
     is_empty = str(value or "").strip() == ""
@@ -33,7 +33,7 @@ def sort_key(row, column, numeric_columns=None):
 
 
 def sorted_indexes(rows, indexes, column="", direction="none", numeric_columns=None):
-    """Provide sorted indexes behavior."""
+    """Sorted indexes."""
     if not column or direction == "none":
         return list(indexes)
     ordered = sorted(
@@ -48,7 +48,7 @@ def sorted_indexes(rows, indexes, column="", direction="none", numeric_columns=N
 
 
 def next_sort_state(current_column, current_direction, clicked_column):
-    """Provide next sort state behavior."""
+    """Next sort state."""
     if current_column != clicked_column:
         return clicked_column, "asc"
     if current_direction == "asc":
@@ -59,7 +59,7 @@ def next_sort_state(current_column, current_direction, clicked_column):
 
 
 def visible_slice(indexes, start, window_size):
-    """Provide visible slice behavior."""
+    """Visible slice."""
     start = clamp_start(start, len(indexes), window_size)
     end = min(len(indexes), start + max(1, window_size))
     return start, end, indexes[start:end]
@@ -78,7 +78,7 @@ def start_for_row_index(indexes, row_index, current_start, window_size):
 
 
 def scrollbar_fractions(start, total, window_size):
-    """Provide scrollbar fractions behavior."""
+    """Scrollbar fractions."""
     if total <= 0:
         return 0.0, 1.0
     first = start / total

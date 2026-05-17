@@ -27,7 +27,7 @@ class GuiTableMixin:
             row.get("tag_suggested_grouping", ""), row.get("model_audio_suggested_grouping", ""),
             row.get("learned_suggested_grouping", ""), row.get("recommended_grouping", ""),
             row.get("target_grouping", ""), row.get("target_color", ""),
-            row.get("recommended_source", ""), row.get("recommended_confidence", ""), row.get("model_audio_bpm", ""),
+            row.get("recommended_source", ""), row.get("recommended_confidence", ""),
         )
 
     def _row_display_tag(self, row, status=None):
@@ -85,7 +85,7 @@ class GuiTableMixin:
         for column, label in self.column_headings.items():
             suffix = ""
             if column == self.sort_column:
-                suffix = " ↑" if self.sort_direction == "asc" else (" ↓" if self.sort_direction == "desc" else "")
+                suffix = " â†‘" if self.sort_direction == "asc" else (" â†“" if self.sort_direction == "desc" else "")
             self.tree.heading(column, text=f"{label}{suffix}", command=lambda selected=column: self.toggle_table_sort(selected))
 
     def _refresh_filtered_rows(self, keep_start=True):
@@ -96,7 +96,7 @@ class GuiTableMixin:
             indexes,
             self.sort_column,
             self.sort_direction,
-            numeric_columns={"model_audio_bpm"},
+            numeric_columns=set(),
         )
         if not keep_start:
             self.virtual_table_start = 0

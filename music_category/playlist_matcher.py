@@ -47,7 +47,7 @@ TITLE_JUNK_PATTERNS = (
 
 @dataclass
 class LabelTrack:
-    """Provide LabelTrack behavior."""
+    """LabelTrack."""
     playlist_path: str
     playlist_name: str
     category: str
@@ -61,7 +61,7 @@ class LabelTrack:
 
 
 def clean_title(value):
-    """Provide clean title behavior."""
+    """Clean title."""
     text = Path(value or "").stem
     text = re.sub(r"\[[^\]]*(official|video|lyric|audio|hd|hq|www|mimp3|vmusice|genteflow)[^\]]*\]", " ", text, flags=re.I)
     text = re.sub(r"\([^\)]*(official|video|lyric|audio|hd|hq|www|mimp3|vmusice|genteflow)[^\)]*\)", " ", text, flags=re.I)
@@ -71,20 +71,20 @@ def clean_title(value):
 
 
 def clean_artist(value):
-    """Provide clean artist behavior."""
+    """Clean artist."""
     text = value or ""
     text = re.sub(r"\b(feat|ft|featuring|con|with)\b.*$", " ", text, flags=re.I)
     return config.normalize_text(text)
 
 
 def primary_artist(value):
-    """Provide primary artist behavior."""
+    """Primary artist."""
     text = re.split(r"\s*(?:,|&|/|\+|\bx\b|\band\b|\by\b)\s*", value or "", maxsplit=1, flags=re.I)[0]
     return clean_artist(text)
 
 
 def split_artist_title(value):
-    """Provide split artist title behavior."""
+    """Split artist title."""
     text = Path(value or "").stem
     parts = re.split(r"\s+-\s+", text, maxsplit=1)
     if len(parts) == 2:
@@ -93,7 +93,7 @@ def split_artist_title(value):
 
 
 def extract_year(*values):
-    """Provide extract year behavior."""
+    """Extract year."""
     for value in values:
         match = re.search(r"\b(19[4-9]\d|20[0-3]\d)\b", value or "")
         if match:
@@ -102,7 +102,7 @@ def extract_year(*values):
 
 
 def ratio(left, right):
-    """Provide ratio behavior."""
+    """Ratio."""
     left = left or ""
     right = right or ""
     if not left or not right:
@@ -115,7 +115,7 @@ def ratio(left, right):
 
 
 def category_from_playlist_name(playlist_name, explicit_category=""):
-    """Provide category from playlist name behavior."""
+    """Category from playlist name."""
     if explicit_category:
         return config.normalize_value_to_category(explicit_category)
     patterns = config.CATEGORY_CONFIG.get("playlist_label_patterns", {})
@@ -127,7 +127,7 @@ def category_from_playlist_name(playlist_name, explicit_category=""):
 
 
 def label_track_from_values(playlist_path, playlist_name, category, artist="", title="", album="", year="", duration=""):
-    """Provide label track from values behavior."""
+    """Label track from values."""
     category = category_from_playlist_name(playlist_name, category)
     grouping = config.category_to_grouping(category)
     color = config.category_to_color(category)
@@ -146,7 +146,7 @@ def label_track_from_values(playlist_path, playlist_name, category, artist="", t
 
 
 def _row_value(row, *names):
-    """Provide row value behavior."""
+    """Row value."""
     lowered = {key.lower().strip(): value for key, value in row.items()}
     for name in names:
         value = lowered.get(name.lower())
@@ -156,7 +156,7 @@ def _row_value(row, *names):
 
 
 def _attr_value(element, *names):
-    """Provide attr value behavior."""
+    """Attr value."""
     attrs = {key.lower().strip(): value for key, value in element.attrib.items()}
     for name in names:
         value = attrs.get(name.lower())
@@ -166,7 +166,7 @@ def _attr_value(element, *names):
 
 
 def _child_attr_value(element, child_name, *names):
-    """Provide child attr value behavior."""
+    """Child attr value."""
     for child in element:
         if child.tag.lower().endswith(child_name.lower()):
             value = _attr_value(child, *names)
@@ -263,7 +263,7 @@ def read_label_playlist(path, explicit_category=""):
 
 
 def local_identity(row):
-    """Provide local identity behavior."""
+    """Local identity."""
     artist = row.get("artist") or ""
     title = row.get("title") or ""
     album = row.get("album") or ""
@@ -286,7 +286,7 @@ def local_identity(row):
 
 
 def score_match(label, row):
-    """Provide score match behavior."""
+    """Score match."""
     local = local_identity(row)
     label_artist = clean_artist(label.artist)
     label_primary_artist = primary_artist(label.artist)
@@ -319,7 +319,7 @@ def score_match(label, row):
 
 
 def best_match(label, local_rows):
-    """Provide best match behavior."""
+    """Best match."""
     scored = []
     for row in local_rows:
         score, reason = score_match(label, row)

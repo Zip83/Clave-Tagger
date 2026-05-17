@@ -1,8 +1,8 @@
 # ClaveTagger
 
-ClaveTagger is a local MP3 categorization tool for Latin DJ libraries. It reads ID3 metadata, suggests configured music categories, can analyze audio with the MAEST Discogs model, can train local classifiers from already tagged files, and can write reviewed `Grouping` / `Color` tags back to MP3 files.
+ClaveTagger is a local MP3 categorization tool for Latin DJ libraries. It reads ID3 metadata, suggests configured music categories, can analyze audio with the MAEST Discogs model and Librosa audio features, can train local scikit-learn or PyTorch classifiers from already tagged files, and can write reviewed `Grouping` / `Color` tags back to MP3 files.
 
-This is a hobby project built for personal DJ-library cleanup. It does not guarantee correct genre classification, BPM detection, model predictions, playlist matching, or tag-writing behavior. Treat every suggestion as a draft, review important changes manually, and keep backups of music files before applying tag writes.
+This is a hobby project built for personal DJ-library cleanup. It does not guarantee correct genre classification, audio feature extraction, model predictions, playlist matching, or tag-writing behavior. Treat every suggestion as a draft, review important changes manually, and keep backups of music files before applying tag writes.
 
 The app is safe by default. MP3 files are never modified unless `--apply-write` is passed in the CLI or the GUI write action is explicitly applied.
 
@@ -47,6 +47,18 @@ Install dependencies:
 `.venv-maest` is a local Python environment. It is recreated during setup and must not be committed to git.
 
 The first `model`, `both`, or `all` audio analysis run downloads MAEST / Hugging Face model weights into the normal Hugging Face cache for the current Windows user. Those weights are not stored in this repository.
+
+## Windows Release
+
+GitHub Releases can provide a Windows ZIP build, for example `ClaveTagger-windows-x64.zip`. Download the ZIP, extract it to a normal folder, then run the GUI executable from the extracted folder. The release build is a folder-based PyInstaller package, not a single self-contained EXE, because the audio and ML libraries are more reliable that way.
+
+The first audio-model run can still download Hugging Face model weights into the normal user cache. Local reports, settings, logs, progress caches, and trained models are still written next to the app unless you choose different paths.
+
+To build the same ZIP locally on Windows:
+
+```powershell
+.\scripts\build_windows.ps1 -Python .venv-maest\Scripts\python.exe -Version local
+```
 
 ## Hugging Face Token Setup
 
@@ -208,6 +220,8 @@ The default audio model is MAEST: `mtg-upf/discogs-maest-30s-pw-73e-ts`. Pass `-
 
 Pass `--model-full-track` to make the selected audio model analyze the whole song by averaging 30-second chunks. The progress cache key includes both the audio model id and full-track/clip scope, so results from different models are not reused by mistake.
 
+Audio analysis intentionally does not use BPM as a classification feature. Live Latin recordings often breathe, break, and shift in ways that make tempo stability misleading. ClaveTagger keeps the focus on model labels plus Librosa rhythm, timbre, spectral, harmonic, and percussive features written to the details CSV.
+
 The default recommendation policy is confidence-aware:
 
 1. Manual override
@@ -276,7 +290,7 @@ The main CSV is meant for review:
 - `id3_grouping`, `id3_grouping_normalized`
 - `id3_color`, `id3_color_normalized`
 - `tag_suggested_grouping`, `tag_confidence`
-- `model_audio_suggested_grouping`, `model_audio_confidence`, `model_audio_bpm`
+- `model_audio_suggested_grouping`, `model_audio_confidence`
 - `learned_suggested_grouping`, `learned_confidence`
 - `recommended_grouping`, `recommended_source`, `recommended_confidence`
 - `target_grouping`, `target_color`
@@ -286,6 +300,7 @@ The details CSV keeps helper/debug columns:
 - `tag_reason`
 - `model_audio_top_labels`
 - `model_audio_category_scores`
+- `model_audio_features`
 - `model_audio_reason`
 - `learned_reason`
 
@@ -478,6 +493,6 @@ See `TESTING.md` for more examples.
 
 Recommended app name: `ClaveTagger`
 
-Recommended git repository name: `clave-tagger`
+Public repository: `Clave-Tagger`
 
 Do not commit local virtual environments, downloaded model caches, generated reports, logs, progress JSON, or trained model binaries unless there is an intentional release/artifact process.

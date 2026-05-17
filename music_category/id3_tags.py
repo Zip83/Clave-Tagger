@@ -8,13 +8,13 @@ GROUPING_KEYS = ("TIT1", "GRP1", "TXXX:GROUPING", "TXXX:Grouping", "TXXX:groupin
 
 
 def tag_text(tags, key):
-    """Provide tag text behavior."""
+    """Tag text."""
     values = tag_text_values(tags, key)
     return "; ".join(values)
 
 
 def tag_text_values(tags, key):
-    """Provide tag text values behavior."""
+    """Tag text values."""
     frame = tags.get(key)
     if frame is None or not getattr(frame, "text", None):
         return []

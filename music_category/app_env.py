@@ -6,7 +6,7 @@ TOKEN_KEYS = {"HF_TOKEN", "HUGGINGFACE_HUB_TOKEN"}
 
 
 def _clean_env_value(value):
-    """Provide clean env value behavior."""
+    """Clean env value."""
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return value[1:-1]
@@ -38,12 +38,12 @@ def load_env_file(path=".env"):
 
 
 def hf_token_status():
-    """Provide hf token status behavior."""
+    """Hf token status."""
     return "found" if any(os.environ.get(key) for key in TOKEN_KEYS) else "not found"
 
 
 def env_status_message(status):
-    """Provide env status message behavior."""
+    """Env status message."""
     exists = "found" if status.get("exists") else "missing"
     loaded = ", ".join(_safe_key(key) for key in status.get("loaded", [])) or "none"
     skipped = ", ".join(_safe_key(key) for key in status.get("skipped_existing", [])) or "none"
@@ -51,12 +51,12 @@ def env_status_message(status):
 
 
 def _safe_key(key):
-    """Provide safe key behavior."""
+    """Safe key."""
     return key if key not in TOKEN_KEYS else key
 
 
 def friendly_hf_error(error):
-    """Provide friendly hf error behavior."""
+    """Friendly hf error."""
     text = str(error)
     lowered = text.lower()
     if any(marker in lowered for marker in ("401", "403", "unauthorized", "forbidden", "gated", "private")):

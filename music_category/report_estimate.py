@@ -14,7 +14,7 @@ def estimate_remaining_seconds(rows, mode, progress_path):
 
 
 def print_estimate(rows, mode, progress_path):
-    """Provide print estimate behavior."""
+    """Print estimate."""
     cached, estimated_seconds = estimate_remaining_seconds(rows, mode, progress_path)
     print(f"Files: {len(rows)}")
     print(f"Mode: {mode}")

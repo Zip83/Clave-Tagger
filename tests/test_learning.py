@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from music_category.cancel import CancelToken, CancelledError
-from music_category import heavy_model, learning
+from music_category import audio_features, heavy_model, learning
 
 
 class LearningTests(unittest.TestCase):
@@ -15,13 +15,13 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(scores["Salsa (Dura)"], 0.02)
         self.assertNotIn("broken", scores)
 
-    def test_learned_features_include_model_scores_labels_and_bpm(self):
+    def test_learned_features_include_model_scores_labels_and_audio_features(self):
         row = {
             "model_audio_category_scores": "Rumba=0.0600; Salsa (Dura)=0.0200",
             "model_audio_top_labels": "Latin---Rumba=0.0400, Latin---Salsa=0.0200",
             "model_audio_suggested_grouping": "Rumba",
             "tag_suggested_grouping": "Rumba",
-            "model_audio_bpm": "110",
+            "model_audio_features": "audio_feature:mfcc_01:mean=0.250000; audio_feature:percussive_ratio=1.500000",
         }
 
         features = learning.learned_features(row)
@@ -30,7 +30,16 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(features["maest_label:Latin---Rumba"], 0.04)
         self.assertEqual(features["model_guess:Rumba"], 1.0)
         self.assertEqual(features["tag_guess:Rumba"], 1.0)
-        self.assertAlmostEqual(features["bpm"], 0.5)
+        self.assertEqual(features["audio_feature:mfcc_01:mean"], 0.25)
+        self.assertEqual(features["audio_feature:percussive_ratio"], 1.5)
+        self.assertFalse(any("bpm" in key.lower() for key in features))
+
+    def test_audio_features_round_trip_from_serialized_details(self):
+        values = {"audio_feature:mfcc_01:mean": 0.125, "audio_feature:percussive_ratio": 2.0}
+
+        serialized = audio_features.serialize_audio_features(values)
+
+        self.assertEqual(audio_features.parse_audio_features(serialized), values)
 
     def test_truth_category_uses_first_normalized_grouping(self):
         row = {"id3_grouping_normalized": "#Rumba; #Salsa"}

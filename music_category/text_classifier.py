@@ -20,7 +20,7 @@ DEFAULT_TEXT_RULES = {
 
 
 def _text_rules():
-    """Provide text rules behavior."""
+    """Text rules."""
     configured = config.text_classification_config()
     rules = dict(DEFAULT_TEXT_RULES)
     rules["weights"] = {**DEFAULT_TEXT_RULES["weights"], **configured.get("weights", {})}
@@ -35,7 +35,7 @@ def _text_rules():
 
 
 def _split_weak_hits(item, hits):
-    """Provide split weak hits behavior."""
+    """Split weak hits."""
     weak_patterns = {config.normalize_text(pattern) for pattern in item.get("weak_tag_patterns", [])}
     strong = [hit for hit in hits if config.normalize_text(hit) not in weak_patterns]
     weak = [hit for hit in hits if config.normalize_text(hit) in weak_patterns]

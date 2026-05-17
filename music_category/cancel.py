@@ -2,30 +2,30 @@ import threading
 
 
 class CancelledError(Exception):
-    """Provide CancelledError behavior."""
+    """CancelledError."""
     pass
 
 
 class CancelToken:
-    """Provide CancelToken behavior."""
+    """CancelToken."""
     def __init__(self):
         """Initialize this object."""
         self._event = threading.Event()
 
     def cancel(self):
-        """Provide cancel behavior."""
+        """Cancel."""
         self._event.set()
 
     @property
     def cancelled(self):
-        """Provide cancelled behavior."""
+        """Cancelled."""
         return self._event.is_set()
 
     def is_cancelled(self):
-        """Provide is cancelled behavior."""
+        """Is cancelled."""
         return self._event.is_set()
 
     def throw_if_cancelled(self):
-        """Provide throw if cancelled behavior."""
+        """Throw if cancelled."""
         if self.is_cancelled():
             raise CancelledError("Operation cancelled.")

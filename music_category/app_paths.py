@@ -21,11 +21,11 @@ DEFAULT_GUI_SETTINGS = SETTINGS_DIR / "gui_settings.json"
 
 
 def ensure_runtime_dirs():
-    """Provide ensure runtime dirs behavior."""
+    """Ensure runtime dirs."""
     for path in (REPORTS_DIR, PROGRESS_DIR, MODELS_DIR, LOGS_DIR, SETTINGS_DIR):
         path.mkdir(parents=True, exist_ok=True)
 
 
 def as_posixish(path):
-    """Provide as posixish behavior."""
+    """As posixish."""
     return str(path).replace("\\", "/")

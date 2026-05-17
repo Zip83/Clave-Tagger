@@ -8,7 +8,7 @@ def parse_priority(priority):
 
 
 def recommendation_sources_for_mode(mode, priority=None):
-    """Provide recommendation sources for mode behavior."""
+    """Recommendation sources for mode."""
     if mode == "tags":
         return ["tags"]
     if mode == "model":
@@ -21,12 +21,12 @@ def recommendation_sources_for_mode(mode, priority=None):
 
 
 def confidence_rank(confidence):
-    """Provide confidence rank behavior."""
+    """Confidence rank."""
     return {"high": 3, "medium": 2, "low": 1, "review": 0, "": 0}.get(confidence, 0)
 
 
 def confidence_aware_sources(row, mode):
-    """Provide confidence aware sources behavior."""
+    """Confidence aware sources."""
     if row.get("manual_grouping"):
         return ["manual"]
     candidates = []

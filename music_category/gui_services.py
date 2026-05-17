@@ -13,7 +13,7 @@ MERGE_REPORT_FIELDS = artifacts.MERGE_REPORT_FIELDS
 
 @dataclass
 class ReportOptions:
-    """Provide ReportOptions behavior."""
+    """ReportOptions."""
     source_paths: list
     input_csv: str
     output_csv: str
@@ -46,7 +46,7 @@ class ReportOptions:
 
 @dataclass
 class TrainOptions:
-    """Provide TrainOptions behavior."""
+    """TrainOptions."""
     source_paths: list
     input_csv: str
     details_csv: str
@@ -73,7 +73,7 @@ class TrainOptions:
 
 
 def _path_if_exists(path):
-    """Provide path if exists behavior."""
+    """Path if exists."""
     return artifacts.path_if_exists(path)
 
 
@@ -83,7 +83,7 @@ def detect_existing_artifacts(action, options):
 
 
 def backup_artifacts(paths, backup_root="backups", timestamp=None):
-    """Provide backup artifacts behavior."""
+    """Backup artifacts."""
     return artifacts.backup_artifacts(paths, backup_root, timestamp)
 
 
@@ -93,18 +93,18 @@ def _read_plain_csv(path):
 
 
 def merge_report_artifacts(rows, main_csv="", details_csv=""):
-    """Provide merge report artifacts behavior."""
+    """Merge report artifacts."""
     return artifacts.merge_report_artifacts(rows, main_csv, details_csv)
 
 
 def prepare_artifacts(action, options, status_callback=None):
-    """Provide prepare artifacts behavior."""
+    """Prepare artifacts."""
     return artifacts.prepare_artifacts(action, options, status_callback)
 
 
 @dataclass
 class WriteOptions:
-    """Provide WriteOptions behavior."""
+    """WriteOptions."""
     csv_path: str
     config_path: str
     grouping_column: str
@@ -115,7 +115,7 @@ class WriteOptions:
 
 @dataclass
 class EvaluationOptions:
-    """Provide EvaluationOptions behavior."""
+    """EvaluationOptions."""
     source_paths: list
     input_csv: str
     mode: str
@@ -126,7 +126,7 @@ class EvaluationOptions:
 
 @dataclass
 class CalibrationOptions:
-    """Provide CalibrationOptions behavior."""
+    """CalibrationOptions."""
     input_csv: str
     output_config: str
     mismatch_output: str
@@ -135,7 +135,7 @@ class CalibrationOptions:
 
 @dataclass
 class LabelPlaylistOptions:
-    """Provide LabelPlaylistOptions behavior."""
+    """LabelPlaylistOptions."""
     playlist_paths: list
     explicit_category: str
     min_score: float
@@ -144,7 +144,7 @@ class LabelPlaylistOptions:
 
 
 def default_classifier_output_for_backend(backend):
-    """Provide default classifier output for backend behavior."""
+    """Default classifier output for backend."""
     if backend == "heavy":
         return str(app_paths.DEFAULT_HEAVY_CLASSIFIER)
     return str(app_paths.DEFAULT_LIGHT_CLASSIFIER)
@@ -156,7 +156,7 @@ def sync_classifier_paths_for_backend(backend, classifier_path, classifier_outpu
         return classifier_path, classifier_output
 
     def is_default_path(path):
-        """Provide is default path behavior."""
+        """Is default path."""
         normalized = (path or "").replace("\\", "/")
         return normalized in {
             "",
@@ -171,7 +171,7 @@ def sync_classifier_paths_for_backend(backend, classifier_path, classifier_outpu
 
 
 def dependency_state(mode, classifier_backend, use_details=True, write_after_report=False):
-    """Provide dependency state behavior."""
+    """Dependency state."""
     uses_audio_model = mode in {"model", "both", "all"}
     uses_learned = mode in {"learned", "all"}
     is_heavy = classifier_backend == "heavy"
@@ -199,13 +199,13 @@ def load_rows(source_paths, input_csv, mode, config_path, progress_callback=None
 
 
 def rows_without_source_folders(rows, removed_source_paths):
-    """Provide rows without source folders behavior."""
+    """Rows without source folders."""
     removed = {str(Path(path)) for path in removed_source_paths}
     return [row for row in rows if str(Path(row.get("source_folder", ""))) not in removed]
 
 
 def preview_rows(source_paths, input_csv, config_path, progress_callback=None):
-    """Provide preview rows behavior."""
+    """Preview rows."""
     return load_rows(source_paths, input_csv, "tags", config_path, progress_callback=progress_callback)
 
 
@@ -232,19 +232,19 @@ def refresh_recommendations(rows, mode, priority):
 
 
 def has_existing_grouping(row):
-    """Provide has existing grouping behavior."""
+    """Has existing grouping."""
     return bool(str(row.get("id3_grouping_normalized") or row.get("id3_grouping") or "").strip())
 
 
 def rows_missing_grouping(rows):
-    """Provide rows missing grouping behavior."""
+    """Rows missing grouping."""
     return [row for row in rows if not has_existing_grouping(row)]
 
 
 def run_report(options, model_progress_callback=None, learned_progress_callback=None, rows=None, status_callback=None):
     """Run report."""
     def report_status(message):
-        """Provide report status behavior."""
+        """Report status."""
         if status_callback:
             status_callback(message)
 
@@ -347,7 +347,7 @@ def compare_audio_models(options, progress_callback=None, rows=None, status_call
 def train_classifier(options, progress_callback=None, rows=None, status_callback=None):
     """Train classifier."""
     def report_status(message):
-        """Provide report status behavior."""
+        """Report status."""
         if status_callback:
             status_callback(message)
 

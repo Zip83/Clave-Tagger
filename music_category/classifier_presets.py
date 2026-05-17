@@ -38,17 +38,17 @@ PRESETS = {
 
 
 def choices():
-    """Provide choices behavior."""
+    """Choices."""
     return list(PRESETS)
 
 
 def label_for(name):
-    """Provide label for behavior."""
+    """Label for."""
     return PRESETS.get(name, {}).get("label", name)
 
 
 def name_for_label(label):
-    """Provide name for label behavior."""
+    """Name for label."""
     for name, preset in PRESETS.items():
         if preset["label"] == label:
             return name
@@ -56,12 +56,12 @@ def name_for_label(label):
 
 
 def labels():
-    """Provide labels behavior."""
+    """Labels."""
     return [preset["label"] for preset in PRESETS.values()]
 
 
 def get(name):
-    """Provide get behavior."""
+    """Get."""
     return PRESETS.get(name_for_label(name), PRESETS["light"])
 
 
